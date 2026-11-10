@@ -1,0 +1,17 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Test output
+out-test*/
+*.tmp
+
+# IDE
+.idea/
+.vscode/
+*.swp
