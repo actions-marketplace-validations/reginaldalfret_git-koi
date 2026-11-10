@@ -1,4 +1,4 @@
-name: git-profile-koi
+name: git-koi-action
 description: Draw a GitHub account's koi from its public activity as a looping GIF, a still PNG, and a preview, for a profile README.
 branding:
   icon: droplet
