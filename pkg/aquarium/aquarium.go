@@ -729,13 +729,15 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
     LIVE KOI POND · 12 NATIVE ECOSYSTEM FISH
   </text>
 </g>
-<g transform="translate(978, 28)" text-anchor="end" opacity="0.55">
-  <text x="0" y="4"
-    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
-    font-size="9.5" font-weight="400" fill="#64748b" letter-spacing="0.8">
-    POWERED BY GIT-KOI-AQUARIUM (GO)
-  </text>
-</g>
+<a href="https://github.com/reginaldalfret/git-koi-aquarium" xlink:href="https://github.com/reginaldalfret/git-koi-aquarium" target="_blank" style="cursor: pointer;">
+  <g transform="translate(978, 28)" text-anchor="end" opacity="0.65">
+    <text x="0" y="4"
+      font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+      font-size="9.5" font-weight="500" fill="#94a3b8" letter-spacing="0.8">
+      POWERED BY GIT-KOI-AQUARIUM (GO)
+    </text>
+  </g>
+</a>
 
 </svg>
 `)
