@@ -9,7 +9,7 @@ inputs:
     description: Account whose koi to draw.
     default: ${{ github.repository_owner }}
   body:
-    description: Body color, one of white, black, asagi, tea, gold, platinum, or all.
+    description: Body color, one of white, black, asagi, tea, gold, platinum, all, or aquarium.
     default: white
   output-dir:
     description: Folder, relative to the workspace, that receives koi.gif, koi.png, and preview.html.
@@ -46,11 +46,14 @@ runs:
         KOI_BODY: ${{ inputs.body }}
         KOI_OUTPUT_DIR: ${{ inputs.output-dir }}
       run: |
-        if [ "$KOI_BODY" = "all" ]; then
+        if [ "$KOI_BODY" = "aquarium" ]; then
+          git-koi aquarium "$RUNNER_TEMP/koi-snapshot.json" --output-dir "$KOI_OUTPUT_DIR"
+        elif [ "$KOI_BODY" = "all" ]; then
           for b in asagi black tea gold platinum white; do
             mkdir -p "$KOI_OUTPUT_DIR/$b"
             git-koi render "$RUNNER_TEMP/koi-snapshot.json" --output-dir "$KOI_OUTPUT_DIR/$b" --body "$b"
           done
+          git-koi aquarium "$RUNNER_TEMP/koi-snapshot.json" --output-dir "$KOI_OUTPUT_DIR"
         else
           git-koi render "$RUNNER_TEMP/koi-snapshot.json" --output-dir "$KOI_OUTPUT_DIR" --body "$KOI_BODY"
         fi

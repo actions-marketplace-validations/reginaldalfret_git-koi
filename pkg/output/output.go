@@ -88,8 +88,16 @@ func EncodeSVG(frame *KoiFrame) string {
 
 // EncodeGIF encodes a seamless animated GIF loop at 2x scale (512x512).
 func EncodeGIF(frames []*KoiFrame) ([]byte, error) {
+	return EncodeScaledGIF(frames, StaticExportScale)
+}
+
+// EncodeScaledGIF encodes a seamless animated GIF loop at the given scale factor.
+func EncodeScaledGIF(frames []*KoiFrame, scale int) ([]byte, error) {
 	if len(frames) == 0 {
 		return nil, errors.New("no frames to encode")
+	}
+	if scale < 1 {
+		scale = 1
 	}
 
 	outGif := &gif.GIF{
@@ -98,8 +106,8 @@ func EncodeGIF(frames []*KoiFrame) ([]byte, error) {
 		Disposal:  make([]byte, len(frames)),
 		LoopCount: 0,
 		Config: image.Config{
-			Width:  StaticWidthPixels,
-			Height: StaticHeightPixels,
+			Width:  FrameWidthPixels * scale,
+			Height: FrameHeightPixels * scale,
 		},
 	}
 
@@ -139,25 +147,25 @@ func EncodeGIF(frames []*KoiFrame) ([]byte, error) {
 			}
 		}
 
-		exportW := int(boxWidth * StaticExportScale)
-		exportH := int(boxHeight * StaticExportScale)
+		exportW := int(boxWidth) * scale
+		exportH := int(boxHeight) * scale
 		palImg := image.NewPaletted(image.Rect(0, 0, exportW, exportH), colorPalette)
 
 		// Set bounds offset
 		palImg.Rect = image.Rect(
-			int(boxLeft*StaticExportScale),
-			int(boxTop*StaticExportScale),
-			int((boxLeft+boxWidth)*StaticExportScale),
-			int((boxTop+boxHeight)*StaticExportScale),
+			int(boxLeft)*scale,
+			int(boxTop)*scale,
+			int(boxLeft+boxWidth)*scale,
+			int(boxTop+boxHeight)*scale,
 		)
 
 		for row := 0; row < int(boxHeight); row++ {
 			for col := 0; col < int(boxWidth); col++ {
 				pIdx := nativeIndices[row*int(boxWidth)+col]
-				for dy := 0; dy < StaticExportScale; dy++ {
-					for dx := 0; dx < StaticExportScale; dx++ {
-						px := int(boxLeft*StaticExportScale) + col*StaticExportScale + dx
-						py := int(boxTop*StaticExportScale) + row*StaticExportScale + dy
+				for dy := 0; dy < scale; dy++ {
+					for dx := 0; dx < scale; dx++ {
+						px := int(boxLeft)*scale + col*scale + dx
+						py := int(boxTop)*scale + row*scale + dy
 						palImg.SetColorIndex(px, py, pIdx)
 					}
 				}

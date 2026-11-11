@@ -54,6 +54,14 @@ git-koi render snapshot.json --output-dir ./dist --body asagi
 
 Supported body grounds: `white` *(default)*, `black`, `asagi`, `tea`, `gold`, `platinum`.
 
+### 3. Render Live Moving Aquarium (6 Fishes)
+
+Render a self-contained, animated SVG aquarium (`aquarium.svg`) with all 6 native koi varieties swimming along organic, non-repeating Bézier curves with dynamic banking, light caustics, and water ripples:
+
+```bash
+git-koi aquarium snapshot.json --output-dir ./dist
+```
+
 ---
 
 ## GitHub Actions Integration

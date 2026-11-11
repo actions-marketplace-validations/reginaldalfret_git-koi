@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/reginaldalfret/git-koi/pkg/aquarium"
 	"github.com/reginaldalfret/git-koi/pkg/behavior"
 	"github.com/reginaldalfret/git-koi/pkg/coat"
 	"github.com/reginaldalfret/git-koi/pkg/collect"
@@ -17,10 +18,11 @@ import (
 	"github.com/reginaldalfret/git-koi/pkg/render"
 )
 
-const version = "1.0.2"
+const version = "1.1.0"
 
 const usage = `Usage: git-koi collect LOGIN [--output FILE]
        git-koi render SNAPSHOT --output-dir DIR [--body BODY]
+       git-koi aquarium SNAPSHOT --output-dir DIR
        git-koi --help | --version
 Collect LOGIN's public GitHub snapshot as JSON through ` + "`gh api`" + `: public owned and
 contributed repositories, and daily contributions from the account's creation
@@ -30,10 +32,12 @@ Requires an authenticated GitHub CLI; in GitHub Actions, set GH_TOKEN to github.
 Render a collected SNAPSHOT into DIR: koi.gif swims the behavior chosen for its
 observation date, koi.png is the still koi, and preview.html shows both on light and
 dark backgrounds. BODY is white (the default), black, asagi, tea, gold, or platinum.
+The aquarium command renders all 6 koi into an animated, flowing SVG aquarium (aquarium.svg).
 The files are replaced only after all of them render.
 Errors go to stderr and exit 1; invalid usage exits 2.
 Examples: git-koi collect octocat --output snapshot.json
-          git-koi render snapshot.json --output-dir koi --body asagi`
+          git-koi render snapshot.json --output-dir koi --body asagi
+          git-koi aquarium snapshot.json --output-dir koi`
 
 func main() {
 	args := os.Args[1:]
@@ -107,6 +111,33 @@ func main() {
 		}
 
 		if err := runRender(snapshotPath, outputDir, body); err != nil {
+			fmt.Fprintf(os.Stderr, "git-koi: %v\n", err)
+			os.Exit(1)
+		}
+	case "aquarium":
+		if len(args) < 2 {
+			fmt.Fprintln(os.Stderr, usage)
+			os.Exit(2)
+		}
+		if args[1] == "--help" {
+			fmt.Println(usage)
+			os.Exit(0)
+		}
+		snapshotPath := args[1]
+		var outputDir string
+		for i := 2; i < len(args); i++ {
+			if args[i] == "--output-dir" && i+1 < len(args) {
+				outputDir = args[i+1]
+				i++
+			} else {
+				fmt.Fprintln(os.Stderr, usage)
+				os.Exit(2)
+			}
+		}
+		if outputDir == "" {
+			outputDir = "koi"
+		}
+		if err := runAquarium(snapshotPath, outputDir); err != nil {
 			fmt.Fprintf(os.Stderr, "git-koi: %v\n", err)
 			os.Exit(1)
 		}
@@ -196,6 +227,40 @@ func runRender(snapshotPath, outputDir string, body coat.KoiBody) error {
 	}
 
 	fmt.Printf("%s: wrote %s, %s, %s\n", caption, gifPath, pngPath, htmlPath)
+	return nil
+}
+
+func runAquarium(snapshotPath, outputDir string) error {
+	data, err := os.ReadFile(snapshotPath)
+	if err != nil {
+		return fmt.Errorf("%s: %w", snapshotPath, err)
+	}
+
+	var snapshot history.AccountSnapshot
+	if err := json.Unmarshal(data, &snapshot); err != nil {
+		return fmt.Errorf("%s: %w", snapshotPath, err)
+	}
+
+	dev, err := koi.DeriveKoiDevelopment(&snapshot)
+	if err != nil {
+		return err
+	}
+
+	svgContent, err := aquarium.GenerateAquariumSVG(dev, nil)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(outputDir, 0755); err != nil {
+		return err
+	}
+
+	aquariumPath := filepath.Join(outputDir, "aquarium.svg")
+	if err := replaceFile(aquariumPath, []byte(svgContent)); err != nil {
+		return err
+	}
+
+	fmt.Printf("aquarium: wrote %s\n", aquariumPath)
 	return nil
 }
 
