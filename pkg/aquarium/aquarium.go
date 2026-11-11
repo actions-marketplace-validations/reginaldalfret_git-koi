@@ -449,7 +449,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		gifMap = v
 	}
 
-	if gifMap == nil {
+	if gifMap == nil && len(AuthenticOriginalKoiB64) == 0 && dev != nil {
 		var err error
 		gifMap, err = RenderAquariumGifs(dev)
 		if err != nil {
@@ -597,8 +597,14 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		causticsSVG))
 
 	for _, spec := range DefaultFishSpecs {
-		gifData := gifMap[spec.Body]
-		b64 := base64.StdEncoding.EncodeToString(gifData)
+		var b64 string
+		if origB64, ok := AuthenticOriginalKoiB64[spec.Body]; ok && gifMap == nil {
+			b64 = origB64
+		} else if gifMap != nil && len(gifMap[spec.Body]) > 0 {
+			b64 = base64.StdEncoding.EncodeToString(gifMap[spec.Body])
+		} else if origB64, ok := AuthenticOriginalKoiB64[spec.Body]; ok {
+			b64 = origB64
+		}
 
 		motionAttrs := fmt.Sprintf(`dur="%s" begin="%s" repeatCount="indefinite" rotate="auto" calcMode="linear"`,
 			spec.Duration, spec.Begin)
