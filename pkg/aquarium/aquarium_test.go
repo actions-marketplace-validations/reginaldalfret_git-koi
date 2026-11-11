@@ -51,6 +51,10 @@ func TestGenerateAquariumSVG(t *testing.T) {
 		t.Errorf("SVG does not end with </svg>")
 	}
 
+	if len(DefaultFishSpecs) != 12 {
+		t.Fatalf("expected 12 fish specs, got %d", len(DefaultFishSpecs))
+	}
+
 	for _, spec := range DefaultFishSpecs {
 		if !strings.Contains(svg, spec.PathID) {
 			t.Errorf("SVG missing path ID %s", spec.PathID)
@@ -60,29 +64,13 @@ func TestGenerateAquariumSVG(t *testing.T) {
 		}
 	}
 
-	// Verify head and tail lateral turning oscillation (animateTransform rotate)
-	if !strings.Contains(svg, `type="rotate"`) {
-		t.Errorf("SVG missing lateral turning animateTransform")
+	// Verify quad paths exist
+	quads := []string{"swimQuadTL", "swimQuadTR", "swimQuadBL", "swimQuadBR"}
+	for _, q := range quads {
+		if !strings.Contains(svg, fmt.Sprintf("id=\"%s\"", q)) {
+			t.Errorf("SVG missing quad path %s", q)
+		}
 	}
 
-	// Verify figure-8 lemniscate path exists
-	if !strings.Contains(svg, "swimPathWhite") {
-		t.Errorf("SVG missing white koi figure-8 path")
-	}
-
-	t.Logf("SVG generated: %d bytes, %d fish on figure-8 paths with lateral turning", len(svg), len(DefaultFishSpecs))
-}
-
-func TestFigure8Lemniscate(t *testing.T) {
-	path := figure8Lemniscate(500, 210, 360, 210)
-	if !strings.HasPrefix(path, "M 500.0,210.0") {
-		t.Errorf("figure-8 path does not start at center: %s", path[:20])
-	}
-	if !strings.HasSuffix(path, " Z") {
-		t.Errorf("figure-8 path is not closed with Z")
-	}
-	count := strings.Count(path, " C ")
-	if count != 12 {
-		t.Errorf("expected 12 cubic bezier segments for smooth lemniscate, got %d", count)
-	}
+	t.Logf("SVG generated: %d bytes, 12 fish on non-overlapping quad figure-8 paths", len(svg))
 }

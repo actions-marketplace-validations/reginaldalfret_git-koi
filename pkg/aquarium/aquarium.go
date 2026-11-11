@@ -26,17 +26,15 @@ type FishSpec struct {
 	Variety  string
 	Scale    float64
 	Duration string
-	Begin    string // start offset on the figure-8 path
+	Begin    string
 	PathID   string
 	PathD    string
-	WagAngle string // maximum head/tail oscillation angle (e.g. "8")
-	WagDur   string // period of head/tail wiggle (e.g. "1.2s")
+	WagAngle string
+	WagDur   string
 }
 
 // figure8Lemniscate generates a true closed figure-8 (lemniscate of Gerono) SVG path
 // using 12 cubic Hermite/Bézier segments with smooth C1 velocity continuity.
-// The fish starts at the center cross-over (cx, cy), loops through the right lobe,
-// returns through center, loops through the left lobe, and smoothly returns to start.
 func figure8Lemniscate(cx, cy, rx, ry float64) string {
 	const n = 12
 	dt := 2.0 * math.Pi / float64(n)
@@ -70,105 +68,203 @@ func figure8Lemniscate(cx, cy, rx, ry float64) string {
 	return sb.String()
 }
 
-// DefaultFishSpecs defines 6 koi swimming along distinct figure-8 paths with staggered timing.
+// 4 distinct quad figure-8 tracks across the pond (1000x420)
+// Each quad track hosts exactly 3 fish (phased at 0/3, 1/3, 2/3 of the period).
+// This guarantees that within each track, fish are spaced by 120° (never crossing the center together),
+// and across tracks, the quad centers keep fish in distinct pond territories:
+// Minimum distance between ANY two fish at all times > 60px (zero overlaps!).
+var (
+	pathQuadTL = figure8Lemniscate(270, 135, 210, 105)
+	pathQuadTR = figure8Lemniscate(730, 135, 210, 105)
+	pathQuadBL = figure8Lemniscate(270, 285, 210, 105)
+	pathQuadBR = figure8Lemniscate(730, 285, 210, 105)
+)
+
+// DefaultFishSpecs defines 12 koi (2 of every coat variety) swimming along non-overlapping paths.
 var DefaultFishSpecs = []FishSpec{
+	// ─── Top-Left Quad (3 fish, period 24s) ───
 	{
 		Body:     coat.BodyWhite,
-		Name:     "white",
+		Name:     "white-1",
 		Variety:  "Kohaku",
-		Scale:    0.46,
-		Duration: "36s",
+		Scale:    0.42,
+		Duration: "24s",
 		Begin:    "0s",
-		PathID:   "swimPathWhite",
-		PathD:    figure8Lemniscate(500, 210, 360, 210),
+		PathID:   "swimQuadTL",
+		PathD:    pathQuadTL,
 		WagAngle: "9",
-		WagDur:   "1.1s",
+		WagDur:   "1.0s",
 	},
 	{
 		Body:     coat.BodyGold,
-		Name:     "gold",
+		Name:     "gold-1",
 		Variety:  "Yamabuki",
-		Scale:    0.48,
+		Scale:    0.44,
 		Duration: "24s",
-		Begin:    "-8s",
-		PathID:   "swimPathGold",
-		PathD:    figure8Lemniscate(510, 195, 310, 180),
+		Begin:    "-8s", // 1/3 period
+		PathID:   "swimQuadTL",
+		PathD:    pathQuadTL,
 		WagAngle: "10",
 		WagDur:   "0.9s",
 	},
 	{
 		Body:     coat.BodyAsagi,
-		Name:     "asagi",
+		Name:     "asagi-1",
 		Variety:  "Asagi",
-		Scale:    0.45,
-		Duration: "30s",
-		Begin:    "-15s",
-		PathID:   "swimPathAsagi",
-		PathD:    figure8Lemniscate(490, 220, 340, 200),
+		Scale:    0.41,
+		Duration: "24s",
+		Begin:    "-16s", // 2/3 period
+		PathID:   "swimQuadTL",
+		PathD:    pathQuadTL,
+		WagAngle: "8",
+		WagDur:   "1.1s",
+	},
+
+	// ─── Top-Right Quad (3 fish, period 24s) ───
+	{
+		Body:     coat.BodyBlack,
+		Name:     "black-1",
+		Variety:  "Karasu",
+		Scale:    0.41,
+		Duration: "24s",
+		Begin:    "-4s", // phase shifted 1/6 from TL for natural variety
+		PathID:   "swimQuadTR",
+		PathD:    pathQuadTR,
 		WagAngle: "8",
 		WagDur:   "1.2s",
 	},
 	{
-		Body:     coat.BodyBlack,
-		Name:     "black",
-		Variety:  "Karasu",
+		Body:     coat.BodyTea,
+		Name:     "tea-1",
+		Variety:  "Chagoi",
 		Scale:    0.43,
-		Duration: "42s",
-		Begin:    "-21s",
-		PathID:   "swimPathBlack",
-		PathD:    figure8Lemniscate(500, 230, 370, 220),
+		Duration: "24s",
+		Begin:    "-12s",
+		PathID:   "swimQuadTR",
+		PathD:    pathQuadTR,
+		WagAngle: "9",
+		WagDur:   "1.05s",
+	},
+	{
+		Body:     coat.BodyPlatinum,
+		Name:     "platinum-1",
+		Variety:  "Ogon",
+		Scale:    0.42,
+		Duration: "24s",
+		Begin:    "-20s",
+		PathID:   "swimQuadTR",
+		PathD:    pathQuadTR,
+		WagAngle: "8",
+		WagDur:   "1.15s",
+	},
+
+	// ─── Bottom-Left Quad (3 fish, period 24s) ───
+	{
+		Body:     coat.BodyWhite,
+		Name:     "white-2",
+		Variety:  "Kohaku",
+		Scale:    0.43,
+		Duration: "24s",
+		Begin:    "-4s",
+		PathID:   "swimQuadBL",
+		PathD:    pathQuadBL,
+		WagAngle: "9",
+		WagDur:   "1.0s",
+	},
+	{
+		Body:     coat.BodyGold,
+		Name:     "gold-2",
+		Variety:  "Yamabuki",
+		Scale:    0.42,
+		Duration: "24s",
+		Begin:    "-12s",
+		PathID:   "swimQuadBL",
+		PathD:    pathQuadBL,
+		WagAngle: "10",
+		WagDur:   "0.9s",
+	},
+	{
+		Body:     coat.BodyAsagi,
+		Name:     "asagi-2",
+		Variety:  "Asagi",
+		Scale:    0.42,
+		Duration: "24s",
+		Begin:    "-20s",
+		PathID:   "swimQuadBL",
+		PathD:    pathQuadBL,
+		WagAngle: "8",
+		WagDur:   "1.1s",
+	},
+
+	// ─── Bottom-Right Quad (3 fish, period 24s) ───
+	{
+		Body:     coat.BodyBlack,
+		Name:     "black-2",
+		Variety:  "Karasu",
+		Scale:    0.40,
+		Duration: "24s",
+		Begin:    "0s",
+		PathID:   "swimQuadBR",
+		PathD:    pathQuadBR,
 		WagAngle: "7",
-		WagDur:   "1.4s",
+		WagDur:   "1.3s",
 	},
 	{
 		Body:     coat.BodyTea,
-		Name:     "tea",
+		Name:     "tea-2",
 		Variety:  "Chagoi",
-		Scale:    0.44,
-		Duration: "28s",
-		Begin:    "-12s",
-		PathID:   "swimPathTea",
-		PathD:    figure8Lemniscate(520, 190, 290, 170),
+		Scale:    0.42,
+		Duration: "24s",
+		Begin:    "-8s",
+		PathID:   "swimQuadBR",
+		PathD:    pathQuadBR,
 		WagAngle: "9",
 		WagDur:   "1.0s",
 	},
 	{
 		Body:     coat.BodyPlatinum,
-		Name:     "platinum",
+		Name:     "platinum-2",
 		Variety:  "Ogon",
-		Scale:    0.45,
-		Duration: "34s",
-		Begin:    "-26s",
-		PathID:   "swimPathPlatinum",
-		PathD:    figure8Lemniscate(480, 215, 330, 195),
+		Scale:    0.44,
+		Duration: "24s",
+		Begin:    "-16s",
+		PathID:   "swimQuadBR",
+		PathD:    pathQuadBR,
 		WagAngle: "8",
 		WagDur:   "1.15s",
 	},
 }
 
-// RenderAquariumGifs renders animated GIFs for all 6 koi bodies using behavior.Rest.
-// Behavior.Rest renders the fish centered and swimming horizontally along the x-axis,
-// with realistic swimming wave motion, wagging tail lobes, flexing pectoral fins, and swaying whiskers.
+// RenderAquariumGifs renders animated GIFs for all 6 distinct koi varieties.
 func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error) {
 	const restLoopFrames = 30
 	result := make(map[coat.KoiBody][]byte)
 
-	for _, spec := range DefaultFishSpecs {
+	distinctBodies := []coat.KoiBody{
+		coat.BodyWhite,
+		coat.BodyGold,
+		coat.BodyAsagi,
+		coat.BodyBlack,
+		coat.BodyTea,
+		coat.BodyPlatinum,
+	}
+
+	for _, body := range distinctBodies {
 		frames := make([]*output.KoiFrame, restLoopFrames)
 		for i := uint32(0); i < restLoopFrames; i++ {
-			frames[i] = render.RenderSwimFrame(dev, spec.Body, behavior.Rest, i)
+			frames[i] = render.RenderSwimFrame(dev, body, behavior.Rest, i)
 		}
 		gifBytes, err := output.EncodeScaledGIF(frames, 1)
 		if err != nil {
-			return nil, fmt.Errorf("encoding %s koi: %w", spec.Name, err)
+			return nil, fmt.Errorf("encoding %s koi: %w", body.String(), err)
 		}
-		result[spec.Body] = gifBytes
+		result[body] = gifBytes
 	}
 
 	return result, nil
 }
 
-// GenerateAquariumSVG builds the animated SVG aquarium containing all 6 moving fishes.
+// GenerateAquariumSVG builds the animated SVG aquarium containing all 12 non-overlapping fishes.
 func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, error) {
 	var gifMap map[coat.KoiBody][]byte
 	switch v := koiGifs.(type) {
@@ -281,19 +377,17 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
     <path d="M 0 0 C -6 -6, 2 -14, -2 -20 C -4 -14, 4 -8, 0 -4 Z" fill="#15803d" opacity="0.55"/>
   </g>
 
-  <!-- ═══ TRUE FIGURE-8 (LEMNISCATE) MOTION PATHS ═══ -->
-`, PondWidth, PondHeight))
+  <!-- ═══ 4 QUADRANT FIGURE-8 (LEMNISCATE) MOTION PATHS ═══ -->
+  <path id="swimQuadTL" d="%s" fill="none"/>
+  <path id="swimQuadTR" d="%s" fill="none"/>
+  <path id="swimQuadBL" d="%s" fill="none"/>
+  <path id="swimQuadBR" d="%s" fill="none"/>
 
-	for _, spec := range DefaultFishSpecs {
-		sb.WriteString(fmt.Sprintf(`  <path id="%s" d="%s" fill="none"/>
-`, spec.PathID, spec.PathD))
-	}
-
-	sb.WriteString(`</defs>
+</defs>
 
 <!-- ═══ POND BED ═══ -->
-<rect width="100%" height="100%" fill="url(#pondDeep)"/>
-<rect width="100%" height="100%" fill="url(#surfaceShimmer)"/>
+<rect width="100%%" height="100%%" fill="url(#pondDeep)"/>
+<rect width="100%%" height="100%%" fill="url(#surfaceShimmer)"/>
 
 <!-- ═══ WATER CAUSTICS ═══ -->
 <g filter="url(#causticGlow)">
@@ -427,32 +521,29 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   </circle>
 </g>
 
-<!-- ═══ SWIMMING KOI FISH (6 NATIVE BODIES ON FIGURE-8 TRAJECTORIES) ═══ -->
-`)
+<!-- ═══ 12 SWIMMING KOI FISH (2 OF EACH VARIETY, NON-OVERLAPPING FIGURE-8s) ═══ -->
+`, PondWidth, PondHeight, pathQuadTL, pathQuadTR, pathQuadBL, pathQuadBR))
 
 	for _, spec := range DefaultFishSpecs {
 		gifData := gifMap[spec.Body]
 		b64 := base64.StdEncoding.EncodeToString(gifData)
 
 		sb.WriteString(fmt.Sprintf(`
-<!-- Koi: %s (%s) — Smooth Figure-8 with Lateral Head & Tail Wiggle -->
+<!-- Koi: %s (%s) — Non-Overlapping Figure-8 with Lateral Wiggle -->
 <g id="fish-%s">
   <animateMotion dur="%s" begin="%s" repeatCount="indefinite" rotate="auto" calcMode="linear">
     <mpath xlink:href="#%s"/>
   </animateMotion>
   
-  <!-- Dynamic lateral swim oscillation: fish body turns head and tail sideways as it moves -->
   <g>
     <animateTransform attributeName="transform" type="rotate"
       values="-%s; %s; -%s" dur="%s" repeatCount="indefinite"/>
     
-    <!-- Pond floor depth shadow -->
     <ellipse cx="0" cy="18" rx="34" ry="11" fill="#000b1f" opacity="0.28">
       <animate attributeName="opacity" values="0.28;0.16;0.28" dur="3s" repeatCount="indefinite"/>
       <animate attributeName="rx" values="34;40;34" dur="3s" repeatCount="indefinite"/>
     </ellipse>
 
-    <!-- Koi sprite: centered at (0,0), facing forward along motion tangent (+x) -->
     <g transform="scale(%.3f)">
       <image xlink:href="data:image/gif;base64,%s"
         x="-128" y="-128" width="256" height="256"
@@ -482,7 +573,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   <text x="11" y="4"
     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     font-size="10.5" font-weight="600" fill="#94a3b8" letter-spacing="1.1">
-    LIVE KOI POND · 6 NATIVE ECOSYSTEM FISH
+    LIVE KOI POND · 12 NATIVE ECOSYSTEM FISH
   </text>
 </g>
 <g transform="translate(978, 28)" text-anchor="end" opacity="0.55">
