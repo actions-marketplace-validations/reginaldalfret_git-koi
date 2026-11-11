@@ -31,11 +31,11 @@ type FishSpec struct {
 	PathD     string
 	WagAngle  string
 	WagDur    string
-	KeyTimes  string // Dynamic SMIL pacing (acceleration, glide, pause)
-	KeyPoints string // Keyframe positions along path
+	KeyTimes  string
+	KeyPoints string
 }
 
-// buildLifeCyclePath constructs an organic, seamless multi-stage journey for a fish that incorporates:
+// buildLifeCyclePath constructs an organic multi-stage journey for a fish that incorporates:
 // 1. Oval cruising loop ("0" shape)
 // 2. Straight horizontal sprint
 // 3. Static hover / resting pause with subtle breathing flutter
@@ -103,6 +103,55 @@ func buildLifeCyclePath(seed int, startX, startY float64) string {
 	return sb.String()
 }
 
+// generateCaustics generates authentic animated underwater caustics:
+// flowing refracted light ribbons and pulsing organic cellular dapples.
+func generateCaustics() string {
+	var sb strings.Builder
+
+	// 1. Organic, undulating caustic light ribbons (refracted surface wave patterns)
+	for i := 0; i < 4; i++ {
+		yBase := 80.0 + float64(i)*85.0
+		amp := 18.0
+		dur := 6.0 + float64(i)*1.5
+
+		var d1, d2 strings.Builder
+		d1.WriteString(fmt.Sprintf("M -20,%.1f", yBase))
+		d2.WriteString(fmt.Sprintf("M -20,%.1f", yBase+amp))
+		for x := 0.0; x <= 1020.0; x += 120.0 {
+			y1 := yBase + amp*math.Sin(x*0.015+float64(i))
+			y2 := yBase - amp*math.Sin(x*0.015+float64(i)+0.5)
+			d1.WriteString(fmt.Sprintf(" Q %.1f,%.1f %.1f,%.1f", x+60.0, y1+12.0, x+120.0, y1))
+			d2.WriteString(fmt.Sprintf(" Q %.1f,%.1f %.1f,%.1f", x+60.0, y2-12.0, x+120.0, y2))
+		}
+
+		sb.WriteString(fmt.Sprintf(`  <!-- Refractive Wave Caustic Ribbon %d -->
+  <path d="%s" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
+    <animate attributeName="d" values="%s; %s; %s" dur="%.1fs" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="%.1fs" repeatCount="indefinite"/>
+  </path>
+`, i+1, d1.String(), d1.String(), d2.String(), d1.String(), dur, dur))
+	}
+
+	// 2. Interlocking cellular focal nodes (bright light dapples on pond bottom)
+	for row := 0; row < 3; row++ {
+		for col := 0; col < 6; col++ {
+			cx := 100.0 + float64(col)*155.0 + math.Sin(float64(row*2+col))*18.0
+			cy := 90.0 + float64(row)*115.0 + math.Cos(float64(col*3))*14.0
+			rx := 32.0 + math.Sin(float64(col))*6.0
+			ry := 18.0 + math.Cos(float64(row))*4.0
+			dur := 3.2 + math.Mod(float64(row*4+col*3), 2.5)
+
+			sb.WriteString(fmt.Sprintf(`  <ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#bae6fd" opacity="0.10">
+    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="%.1fs" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="%.1f;%.1f;%.1f" dur="%.1fs" repeatCount="indefinite"/>
+  </ellipse>
+`, cx, cy, rx, ry, dur, rx, rx*1.25, rx, dur+0.4))
+		}
+	}
+
+	return sb.String()
+}
+
 // 12 Full-Lifecycle Paths: Every single fish performs Oval, Straight, Static Hover, Zig-Zag, and Figure-8!
 var (
 	pathLife0  = buildLifeCyclePath(0, 500, 205)
@@ -120,7 +169,6 @@ var (
 )
 
 // DefaultFishSpecs defines 12 koi (2 of every variety). Every fish performs every motion!
-// Natural pacing: accelerates on straights, coasts on ovals, hovers/pauses, zig-zags, and loops in figure-8.
 var DefaultFishSpecs = []FishSpec{
 	{
 		Body:      coat.BodyWhite,
@@ -337,6 +385,8 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		}
 	}
 
+	causticsSVG := generateCaustics()
+
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d" width="100%%" style="border-radius:16px; overflow:hidden; display:block; background:#050d1a;">
@@ -362,7 +412,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 
   <!-- ═══ FILTERS ═══ -->
   <filter id="causticGlow" x="-20%%" y="-20%%" width="140%%" height="140%%">
-    <feGaussianBlur stdDeviation="6" result="blur"/>
+    <feGaussianBlur stdDeviation="4" result="blur"/>
     <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 
@@ -454,49 +504,9 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 <rect width="100%%" height="100%%" fill="url(#pondDeep)"/>
 <rect width="100%%" height="100%%" fill="url(#surfaceShimmer)"/>
 
-<!-- ═══ LAYER 2: WATER CAUSTICS (ANGLED SUN SHAFTS & FLOOR DAPPLES) ═══ -->
+<!-- ═══ LAYER 2: NATURAL WATER CAUSTICS (REFRACTED LIGHT MESH & CELLULAR DAPPLES) ═══ -->
 <g filter="url(#causticGlow)">
-  <polygon points="60,0 180,0 320,420 160,420" fill="#38bdf8" opacity="0.07">
-    <animate attributeName="opacity" values="0.04;0.13;0.07;0.11;0.04" dur="7s" repeatCount="indefinite"/>
-  </polygon>
-  <polygon points="380,0 500,0 580,420 380,420" fill="#06b6d4" opacity="0.06">
-    <animate attributeName="opacity" values="0.03;0.11;0.05;0.09;0.03" dur="9s" begin="1.5s" repeatCount="indefinite"/>
-  </polygon>
-  <polygon points="720,0 840,0 940,420 820,420" fill="#38bdf8" opacity="0.05">
-    <animate attributeName="opacity" values="0.03;0.10;0.06;0.08;0.03" dur="8s" begin="3s" repeatCount="indefinite"/>
-  </polygon>
-  <polygon points="240,0 280,0 340,420 240,420" fill="#bae6fd" opacity="0.05">
-    <animate attributeName="opacity" values="0.02;0.09;0.03;0.07;0.02" dur="11s" begin="2s" repeatCount="indefinite"/>
-  </polygon>
-
-  <ellipse cx="160" cy="130" rx="22" ry="9" fill="#7dd3fc" opacity="0.14" transform="rotate(-15, 160, 130)">
-    <animate attributeName="opacity" values="0.08;0.22;0.10;0.18;0.08" dur="4s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="22;30;20;28;22" dur="4s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="460" cy="80" rx="26" ry="10" fill="#38bdf8" opacity="0.12">
-    <animate attributeName="opacity" values="0.06;0.20;0.08;0.16;0.06" dur="5s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="26;18;30;22;26" dur="5s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="740" cy="150" rx="18" ry="7" fill="#7dd3fc" opacity="0.13">
-    <animate attributeName="opacity" values="0.07;0.21;0.09;0.17;0.07" dur="3.5s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="18;26;16;24;18" dur="3.5s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="300" cy="320" rx="24" ry="9" fill="#2dd4bf" opacity="0.11" transform="rotate(20, 300, 320)">
-    <animate attributeName="opacity" values="0.05;0.17;0.07;0.14;0.05" dur="6s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="24;16;28;20;24" dur="6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="650" cy="350" rx="20" ry="8" fill="#38bdf8" opacity="0.12">
-    <animate attributeName="opacity" values="0.06;0.19;0.08;0.15;0.06" dur="4.5s" begin="1s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="20;28;18;26;20" dur="4.5s" begin="1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="850" cy="260" rx="14" ry="6" fill="#7dd3fc" opacity="0.14">
-    <animate attributeName="opacity" values="0.08;0.24;0.10;0.20;0.08" dur="3s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="14;20;12;18;14" dur="3s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="520" cy="250" rx="16" ry="6" fill="#93c5fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.16;0.07;0.13;0.05" dur="5.5s" begin="2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="16;22;14;20;16" dur="5.5s" begin="2s" repeatCount="indefinite"/>
-  </ellipse>
+%s
 </g>
 
 <!-- ═══ LAYER 3: POND GRAVEL BED ═══ -->
@@ -511,7 +521,8 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 `, PondWidth, PondHeight,
 		pathLife0, pathLife1, pathLife2, pathLife3,
 		pathLife4, pathLife5, pathLife6, pathLife7,
-		pathLife8, pathLife9, pathLife10, pathLife11))
+		pathLife8, pathLife9, pathLife10, pathLife11,
+		causticsSVG))
 
 	for _, spec := range DefaultFishSpecs {
 		gifData := gifMap[spec.Body]
