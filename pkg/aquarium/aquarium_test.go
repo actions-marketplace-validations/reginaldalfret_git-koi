@@ -64,13 +64,27 @@ func TestGenerateAquariumSVG(t *testing.T) {
 		}
 	}
 
-	// Verify quad paths exist
-	quads := []string{"swimQuadTL", "swimQuadTR", "swimQuadBL", "swimQuadBR"}
-	for _, q := range quads {
-		if !strings.Contains(svg, fmt.Sprintf("id=\"%s\"", q)) {
-			t.Errorf("SVG missing quad path %s", q)
+	// Verify Layering: Fish layer MUST come BEFORE botanicals layer in the SVG
+	fishIdx := strings.Index(svg, `id="fish-white-1"`)
+	botanicalsIdx := strings.Index(svg, `id="botanicals"`)
+	if fishIdx == -1 || botanicalsIdx == -1 {
+		t.Fatalf("missing fish or botanicals element")
+	}
+	if fishIdx > botanicalsIdx {
+		t.Errorf("Fish layer (%d) is after botanicals layer (%d)! Fish would render above lotus leaves.", fishIdx, botanicalsIdx)
+	}
+
+	// Verify diverse path types exist
+	expectedPaths := []string{
+		"pathWideOval", "pathCenterFig8", "pathZigZag", "pathStraightPatrol",
+		"pathLeftOval", "pathRightOval", "pathUpperGlide", "pathLowerFig8",
+		"pathDiagonalWander", "pathCentralDiamond", "pathStaticHover", "pathWaveMeander",
+	}
+	for _, p := range expectedPaths {
+		if !strings.Contains(svg, fmt.Sprintf("id=\"%s\"", p)) {
+			t.Errorf("SVG missing path definition %s", p)
 		}
 	}
 
-	t.Logf("SVG generated: %d bytes, 12 fish on non-overlapping quad figure-8 paths", len(svg))
+	t.Logf("SVG verified: 12 fish, diverse paths (oval, fig-8, zig-zag, straight, hover, wave), correct botanical layering")
 }
