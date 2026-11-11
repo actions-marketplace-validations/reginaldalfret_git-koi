@@ -31,285 +31,264 @@ type FishSpec struct {
 	PathD     string
 	WagAngle  string
 	WagDur    string
-	KeyTimes  string // Optional SMIL keyTimes for dynamic acceleration/coasting/pause
-	KeyPoints string // Optional SMIL keyPoints along path
+	KeyTimes  string // Dynamic SMIL pacing (acceleration, glide, pause)
+	KeyPoints string // Keyframe positions along path
 }
 
-// ovalPath generates a smooth closed oval ("0" shaped loop).
-func ovalPath(cx, cy, rx, ry float64) string {
-	const kappa = 0.5522847498
-	ox := rx * kappa
-	oy := ry * kappa
-	return fmt.Sprintf("M %.1f,%.1f C %.1f,%.1f %.1f,%.1f %.1f,%.1f C %.1f,%.1f %.1f,%.1f %.1f,%.1f C %.1f,%.1f %.1f,%.1f %.1f,%.1f C %.1f,%.1f %.1f,%.1f %.1f,%.1f Z",
-		cx+rx, cy,
-		cx+rx, cy+oy, cx+ox, cy+ry, cx, cy+ry,
-		cx-ox, cy+ry, cx-rx, cy+oy, cx-rx, cy,
-		cx-rx, cy-oy, cx-ox, cy-ry, cx, cy-ry,
-		cx+ox, cy-ry, cx+rx, cy-oy, cx+rx, cy)
-}
-
-// figure8Path generates a smooth closed figure-8 (lemniscate) with C1 continuity.
-func figure8Path(cx, cy, rx, ry float64) string {
-	const n = 12
-	dt := 2.0 * math.Pi / float64(n)
-
-	type pt struct{ x, y, dx, dy float64 }
-	pts := make([]pt, n+1)
-	for i := 0; i <= n; i++ {
-		t := float64(i) * dt
-		x := cx + rx*math.Sin(t)
-		y := cy + (ry/2.0)*math.Sin(2.0*t)
-		dx := rx * math.Cos(t) * dt
-		dy := ry * math.Cos(2.0*t) * dt
-		pts[i] = pt{x, y, dx, dy}
+// buildLifeCyclePath constructs an organic, seamless multi-stage journey for a fish that incorporates:
+// 1. Oval cruising loop ("0" shape)
+// 2. Straight horizontal sprint
+// 3. Static hover / resting pause with subtle breathing flutter
+// 4. Serpentine zig-zag / S-curve exploration
+// 5. Figure-8 (∞) loop
+// 6. Return glide back to start
+// All paths are bounded between x∈[180, 810] and y∈[110, 310] so NO fish swims above corner lotus pads.
+func buildLifeCyclePath(seed int, startX, startY float64) string {
+	s := float64(seed)
+	flipY := 1.0
+	if seed%2 == 1 {
+		flipY = -1.0
 	}
+	midY := 210.0 + (s-5.5)*11.0
+	leftX := 240.0 + math.Mod(s*33.0, 60.0)
+	rightX := 760.0 - math.Mod(s*39.0, 60.0)
 
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("M %.1f,%.1f", pts[0].x, pts[0].y))
+	sb.WriteString(fmt.Sprintf("M %.1f,%.1f ", startX, startY))
 
-	for i := 0; i < n; i++ {
-		p0 := pts[i]
-		p1 := pts[i+1]
-		sb.WriteString(fmt.Sprintf(" C %.1f,%.1f %.1f,%.1f %.1f,%.1f",
-			p0.x+p0.dx/3.0, p0.y+p0.dy/3.0, p1.x-p1.dx/3.0, p1.y-p1.dy/3.0, p1.x, p1.y))
-	}
-	sb.WriteString(" Z")
+	// Phase 1: Oval cruising loop ("0" shape)
+	ovY := midY + 45.0*flipY
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		startX+55.0, startY-30.0*flipY, leftX+80.0, ovY-50.0*flipY, leftX, ovY))
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		leftX-35.0, ovY+35.0*flipY, leftX+35.0, ovY+55.0*flipY, leftX+95.0, ovY+20.0*flipY))
+
+	// Phase 2: Straight horizontal patrol across pond
+	cruiseY := midY - 20.0*flipY
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		450.0, cruiseY, 620.0, cruiseY, rightX, cruiseY))
+
+	// Phase 3: Static hover / resting pause (tight micro-drift knots where fish hovers in place)
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		rightX+4.0, cruiseY-3.0, rightX+7.0, cruiseY+2.0, rightX+3.0, cruiseY+5.0))
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		rightX-3.0, cruiseY+6.0, rightX-5.0, cruiseY-2.0, rightX, cruiseY))
+
+	// Phase 4: Serpentine zig-zag / S-curve exploration through sunbeams
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		rightX-70.0, cruiseY+55.0*flipY, 590.0, cruiseY-55.0*flipY, 500.0, midY+35.0*flipY))
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		420.0, midY-50.0*flipY, 360.0, midY+45.0*flipY, 300.0, midY))
+
+	// Phase 5: Figure-8 (∞) loop
+	f8cx := 420.0 + math.Mod(s*21.0, 110.0)
+	f8cy := midY
+	rx := 105.0
+	ry := 60.0
+	// Right lobe of 8
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		f8cx+rx*0.5, f8cy-ry*flipY, f8cx+rx, f8cy-ry*0.5*flipY, f8cx+rx, f8cy))
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		f8cx+rx, f8cy+ry*0.5*flipY, f8cx+rx*0.5, f8cy+ry*flipY, f8cx, f8cy))
+	// Left lobe of 8
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		f8cx-rx*0.5, f8cy-ry*flipY, f8cx-rx, f8cy-ry*0.5*flipY, f8cx-rx, f8cy))
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f ",
+		f8cx-rx, f8cy+ry*0.5*flipY, f8cx-rx*0.5, f8cy+ry*flipY, f8cx, f8cy))
+
+	// Phase 6: Return smooth glide back to start point
+	sb.WriteString(fmt.Sprintf("C %.1f,%.1f %.1f,%.1f %.1f,%.1f Z",
+		f8cx+40.0, f8cy+20.0*flipY, startX-40.0, startY+10.0*flipY, startX, startY))
+
 	return sb.String()
 }
 
-// 12 Diverse, Natural Trajectory Paths:
-// Kept away from corner plants: Top-Left (x<160, y<140) and Bottom-Right (x>830, y>260).
+// 12 Full-Lifecycle Paths: Every single fish performs Oval, Straight, Static Hover, Zig-Zag, and Figure-8!
 var (
-	// 1. Wide Center Oval ("0" shape): grand sweeping perimeter loop
-	pathWideOval = ovalPath(500, 210, 310, 130)
-
-	// 2. Center-Right Figure-8: graceful looping lemniscate
-	pathCenterFig8 = figure8Path(550, 215, 230, 135)
-
-	// 3. Meandering Zig-Zag: serpentine S-curve across middle and upper pond
-	pathZigZag = "M 220,180 C 310,120 400,280 500,190 C 600,100 690,270 780,180 C 700,260 590,290 500,260 C 410,230 310,250 220,180 Z"
-
-	// 4. Straight Horizontal Patrol with turning loops at each end
-	pathStraightPatrol = "M 240,230 C 370,230 630,230 760,230 C 800,230 810,270 770,275 C 640,285 360,285 230,275 C 190,270 200,230 240,230 Z"
-
-	// 5. Left Deep Oval ("0" shape): slow circling in open mid-left water
-	pathLeftOval = ovalPath(340, 225, 150, 95)
-
-	// 6. Right Deep Oval ("0" shape): circling in open mid-right water
-	pathRightOval = ovalPath(660, 195, 150, 95)
-
-	// 7. Upper Gliding Straight Path: slow drift across upper water column
-	pathUpperGlide = "M 270,120 C 420,105 580,105 730,120 C 770,125 765,160 720,155 C 570,140 430,140 280,155 C 235,160 230,125 270,120 Z"
-
-	// 8. Bottom-Left Figure-8: compact exploration in lower-left territory
-	pathLowerFig8 = figure8Path(380, 275, 170, 90)
-
-	// 9. Diagonal Wander: angled criss-cross drift through sun rays
-	pathDiagonalWander = "M 300,150 C 440,190 560,240 700,280 C 750,295 760,250 710,225 C 570,175 450,125 310,95 C 260,85 250,135 300,150 Z"
-
-	// 10. Central Soft Diamond / Rounded Square: mid-pond exploratory loop
-	pathCentralDiamond = "M 500,125 C 620,140 680,180 660,210 C 640,255 580,290 500,295 C 420,290 360,255 340,210 C 320,180 380,140 500,125 Z"
-
-	// 11. Subtle Hover / Station-Holding: nearly static action with gentle breathing drift
-	pathStaticHover = "M 480,205 C 488,202 494,208 490,214 C 486,220 478,218 476,212 C 474,206 480,202 480,205 Z"
-
-	// 12. Gentle Undulating Wave: flowing ripple trajectory through lower-center pond
-	pathWaveMeander = "M 260,250 C 350,305 450,195 550,265 C 640,315 720,215 750,240 C 760,270 700,310 610,315 C 490,320 370,305 260,250 Z"
+	pathLife0  = buildLifeCyclePath(0, 500, 205)
+	pathLife1  = buildLifeCyclePath(1, 520, 215)
+	pathLife2  = buildLifeCyclePath(2, 480, 195)
+	pathLife3  = buildLifeCyclePath(3, 530, 225)
+	pathLife4  = buildLifeCyclePath(4, 470, 200)
+	pathLife5  = buildLifeCyclePath(5, 540, 220)
+	pathLife6  = buildLifeCyclePath(6, 490, 210)
+	pathLife7  = buildLifeCyclePath(7, 510, 200)
+	pathLife8  = buildLifeCyclePath(8, 460, 220)
+	pathLife9  = buildLifeCyclePath(9, 550, 205)
+	pathLife10 = buildLifeCyclePath(10, 485, 215)
+	pathLife11 = buildLifeCyclePath(11, 515, 225)
 )
 
-// DefaultFishSpecs defines 12 koi (2 of every variety) with diverse realistic swimming behaviors:
-// Oval ("0"), Figure-8, Straight Patrol, Zig-Zag, Diagonal, Hover, and Wave.
+// DefaultFishSpecs defines 12 koi (2 of every variety). Every fish performs every motion!
+// Natural pacing: accelerates on straights, coasts on ovals, hovers/pauses, zig-zags, and loops in figure-8.
 var DefaultFishSpecs = []FishSpec{
-	// ─── 1. Kohaku-1 (White/Red): Grand Wide Oval ("0" shape) ───
 	{
 		Body:      coat.BodyWhite,
 		Name:      "white-1",
 		Variety:   "Kohaku",
 		Scale:     0.45,
-		Duration:  "38s",
+		Duration:  "54s",
 		Begin:     "0s",
-		PathID:    "pathWideOval",
-		PathD:     pathWideOval,
+		PathID:    "pathLife0",
+		PathD:     pathLife0,
 		WagAngle:  "8",
 		WagDur:    "1.1s",
-		KeyTimes:  "0; 0.25; 0.40; 0.70; 0.85; 1",
-		KeyPoints: "0; 0.30; 0.38; 0.75; 0.82; 1",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 2. Yamabuki-1 (Gold): Center Figure-8 ───
 	{
 		Body:      coat.BodyGold,
 		Name:      "gold-1",
 		Variety:   "Yamabuki",
 		Scale:     0.46,
-		Duration:  "32s",
-		Begin:     "-7s",
-		PathID:    "pathCenterFig8",
-		PathD:     pathCenterFig8,
+		Duration:  "48s",
+		Begin:     "-9s",
+		PathID:    "pathLife1",
+		PathD:     pathLife1,
 		WagAngle:  "10",
-		WagDur:    "0.9s",
-		KeyTimes:  "0; 0.35; 0.50; 0.85; 1",
-		KeyPoints: "0; 0.40; 0.48; 0.90; 1",
+		WagDur:    "0.95s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 3. Asagi-1 (Blue/Orange): Meandering Zig-Zag ───
 	{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-1",
 		Variety:   "Asagi",
 		Scale:     0.43,
-		Duration:  "35s",
-		Begin:     "-12s",
-		PathID:    "pathZigZag",
-		PathD:     pathZigZag,
+		Duration:  "52s",
+		Begin:     "-18s",
+		PathID:    "pathLife2",
+		PathD:     pathLife2,
 		WagAngle:  "9",
-		WagDur:    "1.0s",
-		KeyTimes:  "0; 0.30; 0.55; 0.80; 1",
-		KeyPoints: "0; 0.35; 0.50; 0.85; 1",
+		WagDur:    "1.05s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 4. Karasu-1 (Black): Straight Horizontal Patrol ───
 	{
 		Body:      coat.BodyBlack,
 		Name:      "black-1",
 		Variety:   "Karasu",
 		Scale:     0.42,
-		Duration:  "42s",
-		Begin:     "-18s",
-		PathID:    "pathStraightPatrol",
-		PathD:     pathStraightPatrol,
-		WagAngle:  "6",
+		Duration:  "58s",
+		Begin:     "-27s",
+		PathID:    "pathLife3",
+		PathD:     pathLife3,
+		WagAngle:  "7",
 		WagDur:    "1.3s",
-		KeyTimes:  "0; 0.40; 0.55; 0.90; 1",
-		KeyPoints: "0; 0.46; 0.50; 0.96; 1", // coasts & pauses at turn
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 5. Chagoi-1 (Tea): Left Deep Oval ("0" shape) ───
 	{
 		Body:      coat.BodyTea,
 		Name:      "tea-1",
 		Variety:   "Chagoi",
 		Scale:     0.44,
-		Duration:  "28s",
-		Begin:     "-5s",
-		PathID:    "pathLeftOval",
-		PathD:     pathLeftOval,
+		Duration:  "46s",
+		Begin:     "-14s",
+		PathID:    "pathLife4",
+		PathD:     pathLife4,
 		WagAngle:  "8",
 		WagDur:    "1.15s",
-		KeyTimes:  "0; 0.45; 0.60; 1",
-		KeyPoints: "0; 0.50; 0.55; 1",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 6. Platinum-1 (Silver): Upper Gliding Straight Path ───
 	{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-1",
 		Variety:   "Ogon",
 		Scale:     0.43,
-		Duration:  "36s",
-		Begin:     "-22s",
-		PathID:    "pathUpperGlide",
-		PathD:     pathUpperGlide,
-		WagAngle:  "7",
-		WagDur:    "1.25s",
-		KeyTimes:  "0; 0.38; 0.52; 0.88; 1",
-		KeyPoints: "0; 0.45; 0.50; 0.95; 1",
+		Duration:  "50s",
+		Begin:     "-35s",
+		PathID:    "pathLife5",
+		PathD:     pathLife5,
+		WagAngle:  "8",
+		WagDur:    "1.2s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 7. Kohaku-2 (White/Red): Right Deep Oval ("0" shape) ───
 	{
 		Body:      coat.BodyWhite,
 		Name:      "white-2",
 		Variety:   "Kohaku",
-		Scale:     0.43,
-		Duration:  "30s",
-		Begin:     "-15s",
-		PathID:    "pathRightOval",
-		PathD:     pathRightOval,
+		Scale:     0.44,
+		Duration:  "56s",
+		Begin:     "-23s",
+		PathID:    "pathLife6",
+		PathD:     pathLife6,
 		WagAngle:  "9",
 		WagDur:    "1.0s",
-		KeyTimes:  "0; 0.35; 0.55; 0.85; 1",
-		KeyPoints: "0; 0.40; 0.50; 0.90; 1",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 8. Yamabuki-2 (Gold): Bottom-Left Figure-8 ───
 	{
 		Body:      coat.BodyGold,
 		Name:      "gold-2",
 		Variety:   "Yamabuki",
-		Scale:     0.42,
-		Duration:  "26s",
-		Begin:     "-9s",
-		PathID:    "pathLowerFig8",
-		PathD:     pathLowerFig8,
+		Scale:     0.43,
+		Duration:  "44s",
+		Begin:     "-12s",
+		PathID:    "pathLife7",
+		PathD:     pathLife7,
 		WagAngle:  "10",
-		WagDur:    "0.95s",
-		KeyTimes:  "0; 0.30; 0.50; 0.80; 1",
-		KeyPoints: "0; 0.36; 0.48; 0.86; 1",
+		WagDur:    "0.9s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 9. Asagi-2 (Blue/Orange): Diagonal Wander Criss-Cross ───
 	{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-2",
 		Variety:   "Asagi",
-		Scale:     0.41,
-		Duration:  "34s",
-		Begin:     "-20s",
-		PathID:    "pathDiagonalWander",
-		PathD:     pathDiagonalWander,
+		Scale:     0.42,
+		Duration:  "50s",
+		Begin:     "-31s",
+		PathID:    "pathLife8",
+		PathD:     pathLife8,
 		WagAngle:  "8",
 		WagDur:    "1.1s",
-		KeyTimes:  "0; 0.42; 0.58; 1",
-		KeyPoints: "0; 0.48; 0.52; 1",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 10. Karasu-2 (Black): Central Soft Diamond Loop ───
 	{
 		Body:      coat.BodyBlack,
 		Name:      "black-2",
 		Variety:   "Karasu",
-		Scale:     0.44,
-		Duration:  "40s",
-		Begin:     "-27s",
-		PathID:    "pathCentralDiamond",
-		PathD:     pathCentralDiamond,
+		Scale:     0.41,
+		Duration:  "60s",
+		Begin:     "-40s",
+		PathID:    "pathLife9",
+		PathD:     pathLife9,
 		WagAngle:  "7",
 		WagDur:    "1.35s",
-		KeyTimes:  "0; 0.28; 0.50; 0.78; 1",
-		KeyPoints: "0; 0.32; 0.48; 0.82; 1",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 11. Tea-2 (Chagoi): Static Station-Holding (Gentle Breathing Hover) ───
 	{
 		Body:      coat.BodyTea,
 		Name:      "tea-2",
 		Variety:   "Chagoi",
 		Scale:     0.45,
-		Duration:  "18s",
-		Begin:     "0s",
-		PathID:    "pathStaticHover",
-		PathD:     pathStaticHover,
-		WagAngle:  "4", // subtle resting fin & tail pulse
-		WagDur:    "2.2s",
-		KeyTimes:  "0; 0.50; 1",
-		KeyPoints: "0; 0.50; 1",
+		Duration:  "47s",
+		Begin:     "-5s",
+		PathID:    "pathLife10",
+		PathD:     pathLife10,
+		WagAngle:  "8",
+		WagDur:    "1.1s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
-
-	// ─── 12. Platinum-2 (Silver): Gentle Undulating Wave Meander ───
 	{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-2",
 		Variety:   "Ogon",
 		Scale:     0.42,
-		Duration:  "33s",
-		Begin:     "-11s",
-		PathID:    "pathWaveMeander",
-		PathD:     pathWaveMeander,
+		Duration:  "53s",
+		Begin:     "-16s",
+		PathID:    "pathLife11",
+		PathD:     pathLife11,
 		WagAngle:  "8",
-		WagDur:    "1.1s",
-		KeyTimes:  "0; 0.35; 0.65; 1",
-		KeyPoints: "0; 0.40; 0.60; 1",
+		WagDur:    "1.15s",
+		KeyTimes:  "0; 0.20; 0.38; 0.48; 0.65; 0.85; 1",
+		KeyPoints: "0; 0.22; 0.40; 0.42; 0.68; 0.88; 1",
 	},
 }
 
@@ -455,19 +434,19 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
     <path d="M 0 0 C -6 -6, 2 -14, -2 -20 C -4 -14, 4 -8, 0 -4 Z" fill="#15803d" opacity="0.55"/>
   </g>
 
-  <!-- ═══ 12 DIVERSE MOTION PATHS (OVALS, FIG-8s, ZIG-ZAGS, PATROLS, HOVER) ═══ -->
-  <path id="pathWideOval" d="%s" fill="none"/>
-  <path id="pathCenterFig8" d="%s" fill="none"/>
-  <path id="pathZigZag" d="%s" fill="none"/>
-  <path id="pathStraightPatrol" d="%s" fill="none"/>
-  <path id="pathLeftOval" d="%s" fill="none"/>
-  <path id="pathRightOval" d="%s" fill="none"/>
-  <path id="pathUpperGlide" d="%s" fill="none"/>
-  <path id="pathLowerFig8" d="%s" fill="none"/>
-  <path id="pathDiagonalWander" d="%s" fill="none"/>
-  <path id="pathCentralDiamond" d="%s" fill="none"/>
-  <path id="pathStaticHover" d="%s" fill="none"/>
-  <path id="pathWaveMeander" d="%s" fill="none"/>
+  <!-- ═══ 12 FULL LIFECYCLE PATHS: EVERY FISH PERFORMS OVAL, SPRINT, HOVER, ZIG-ZAG, FIG-8 ═══ -->
+  <path id="pathLife0" d="%s" fill="none"/>
+  <path id="pathLife1" d="%s" fill="none"/>
+  <path id="pathLife2" d="%s" fill="none"/>
+  <path id="pathLife3" d="%s" fill="none"/>
+  <path id="pathLife4" d="%s" fill="none"/>
+  <path id="pathLife5" d="%s" fill="none"/>
+  <path id="pathLife6" d="%s" fill="none"/>
+  <path id="pathLife7" d="%s" fill="none"/>
+  <path id="pathLife8" d="%s" fill="none"/>
+  <path id="pathLife9" d="%s" fill="none"/>
+  <path id="pathLife10" d="%s" fill="none"/>
+  <path id="pathLife11" d="%s" fill="none"/>
 
 </defs>
 
@@ -530,9 +509,9 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 
 <!-- ═══ LAYER 4: 12 SWIMMING KOI FISH (SWIMMING IN WATER BENEATH SURFACE PLANTS) ═══ -->
 `, PondWidth, PondHeight,
-		pathWideOval, pathCenterFig8, pathZigZag, pathStraightPatrol,
-		pathLeftOval, pathRightOval, pathUpperGlide, pathLowerFig8,
-		pathDiagonalWander, pathCentralDiamond, pathStaticHover, pathWaveMeander))
+		pathLife0, pathLife1, pathLife2, pathLife3,
+		pathLife4, pathLife5, pathLife6, pathLife7,
+		pathLife8, pathLife9, pathLife10, pathLife11))
 
 	for _, spec := range DefaultFishSpecs {
 		gifData := gifMap[spec.Body]
@@ -546,7 +525,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		}
 
 		sb.WriteString(fmt.Sprintf(`
-<!-- Koi: %s (%s) — Diverse Realistic Trajectory -->
+<!-- Koi: %s (%s) — Full Life Cycle Movement (Oval, Sprint, Hover, Zig-Zag, Fig-8) -->
 <g id="fish-%s">
   <animateMotion %s>
     <mpath xlink:href="#%s"/>

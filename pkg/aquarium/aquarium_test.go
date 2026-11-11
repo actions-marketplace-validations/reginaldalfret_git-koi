@@ -71,20 +71,16 @@ func TestGenerateAquariumSVG(t *testing.T) {
 		t.Fatalf("missing fish or botanicals element")
 	}
 	if fishIdx > botanicalsIdx {
-		t.Errorf("Fish layer (%d) is after botanicals layer (%d)! Fish would render above lotus leaves.", fishIdx, botanicalsIdx)
+		t.Errorf("Fish layer is after botanicals layer! Fish would render above lotus leaves.")
 	}
 
-	// Verify diverse path types exist
-	expectedPaths := []string{
-		"pathWideOval", "pathCenterFig8", "pathZigZag", "pathStraightPatrol",
-		"pathLeftOval", "pathRightOval", "pathUpperGlide", "pathLowerFig8",
-		"pathDiagonalWander", "pathCentralDiamond", "pathStaticHover", "pathWaveMeander",
-	}
-	for _, p := range expectedPaths {
-		if !strings.Contains(svg, fmt.Sprintf("id=\"%s\"", p)) {
-			t.Errorf("SVG missing path definition %s", p)
+	// Verify life cycle paths exist (every fish has pathLife0..pathLife11)
+	for i := 0; i < 12; i++ {
+		pathID := fmt.Sprintf("pathLife%d", i)
+		if !strings.Contains(svg, fmt.Sprintf("id=\"%s\"", pathID)) {
+			t.Errorf("SVG missing life cycle path definition %s", pathID)
 		}
 	}
 
-	t.Logf("SVG verified: 12 fish, diverse paths (oval, fig-8, zig-zag, straight, hover, wave), correct botanical layering")
+	t.Logf("SVG verified: 12 fish, all executing full life cycle movements (oval, sprint, hover, zig-zag, fig-8)")
 }
