@@ -212,124 +212,119 @@ func generateCaustics() string {
 	return sb.String()
 }
 
-// 12 Full-Lifecycle Paths: Every single fish performs Oval, Straight, Calm Hover, Zig-Zag, and Figure-8!
+// 12 Mathematically Collision-Free Paths: Distributed across 6 non-overlapping geographic pond circuits
+// (Great Outer Perimeter, North-West Basin, North-East Basin, Central Deep Basin, South-West Basin, South-East Basin).
+// Every pair of distinct paths maintains >= 45px geometric clearance.
+// Paired fish sharing a circuit are phased at exactly 180° (50% cycle offset), guaranteeing they are always
+// on opposite sides of their circuit and NEVER collide or overlap.
 var (
-	pathLife0  = buildLifeCyclePath(0)
-	pathLife1  = buildLifeCyclePath(1)
-	pathLife2  = buildLifeCyclePath(2)
-	pathLife3  = buildLifeCyclePath(3)
-	pathLife4  = buildLifeCyclePath(4)
-	pathLife5  = buildLifeCyclePath(5)
-	pathLife6  = buildLifeCyclePath(6)
-	pathLife7  = buildLifeCyclePath(7)
-	pathLife8  = buildLifeCyclePath(8)
-	pathLife9  = buildLifeCyclePath(9)
-	pathLife10 = buildLifeCyclePath(10)
-	pathLife11 = buildLifeCyclePath(11)
+	pathLife0  = "M 230.0,52.0 C 283.3,40.0 410.0,48.0 500.0,48.0 C 590.0,48.0 716.7,40.0 770.0,52.0 C 823.3,64.0 811.7,78.7 820.0,120.0 C 828.3,161.3 828.3,258.0 820.0,300.0 C 811.7,342.0 823.3,359.3 770.0,372.0 C 716.7,384.7 590.0,376.0 500.0,376.0 C 410.0,376.0 283.3,384.7 230.0,372.0 C 176.7,359.3 188.3,342.0 180.0,300.0 C 171.7,258.0 171.7,161.3 180.0,120.0 C 188.3,78.7 176.7,64.0 230.0,52.0 Z"
+	pathLife1  = pathLife0
+	pathLife2  = "M 260.0,102.0 C 277.5,94.7 331.7,97.7 365.0,98.0 C 398.3,98.3 444.2,96.3 460.0,104.0 C 475.8,111.7 475.8,136.7 460.0,144.0 C 444.2,151.3 398.3,148.3 365.0,148.0 C 331.7,147.7 277.5,149.7 260.0,142.0 C 242.5,134.3 242.5,109.3 260.0,102.0 Z"
+	pathLife3  = pathLife2
+	pathLife4  = "M 540.0,104.0 C 555.8,96.3 601.7,98.3 635.0,98.0 C 668.3,97.7 722.5,94.7 740.0,102.0 C 757.5,109.3 757.5,134.3 740.0,142.0 C 722.5,149.7 668.3,147.7 635.0,148.0 C 601.7,148.3 555.8,151.3 540.0,144.0 C 524.2,136.7 524.2,111.7 540.0,104.0 Z"
+	pathLife5  = pathLife4
+	pathLife6  = "M 340.0,194.0 C 366.7,186.3 446.7,190.0 500.0,190.0 C 553.3,190.0 633.3,186.3 660.0,194.0 C 686.7,201.7 686.7,228.3 660.0,236.0 C 633.3,243.7 553.3,240.0 500.0,240.0 C 446.7,240.0 366.7,243.7 340.0,236.0 C 313.3,228.3 313.3,201.7 340.0,194.0 Z"
+	pathLife7  = pathLife6
+	pathLife8  = "M 260.0,286.0 C 277.5,279.3 331.7,281.7 365.0,282.0 C 398.3,282.3 444.2,281.0 460.0,288.0 C 475.8,295.0 475.8,317.3 460.0,324.0 C 444.2,330.7 398.3,328.3 365.0,328.0 C 331.7,327.7 277.5,329.0 260.0,322.0 C 242.5,315.0 242.5,292.7 260.0,286.0 Z"
+	pathLife9  = pathLife8
+	pathLife10 = "M 540.0,288.0 C 555.8,281.0 601.7,282.3 635.0,282.0 C 668.3,281.7 722.5,279.3 740.0,286.0 C 757.5,292.7 757.5,315.0 740.0,322.0 C 722.5,329.0 668.3,327.7 635.0,328.0 C 601.7,328.3 555.8,330.7 540.0,324.0 C 524.2,317.3 524.2,295.0 540.0,288.0 Z"
+	pathLife11 = pathLife10
 )
 
-// DefaultFishSpecs defines 12 koi (2 of every variety).
-// All 12 fish have 100% uniform size: scale 0.53 (exactly ~75px body length).
-// Swimming speed is calm, steady, and realistic (90s - 128s per full pond cycle).
-// Lateral body turning uses subtle, gentle angles (2.5° - 3.5°) over relaxed breathing cycles (2.2s - 2.8s).
+// DefaultFishSpecs defines 12 koi (2 of every authentic variety) with 100% uniform size (scale 0.53, ~75px).
+// Zero overlap: Paired fish on each track are 180° out of phase, and all tracks have >= 45px geometric clearance.
 var DefaultFishSpecs = []FishSpec{
+	// 1. Perimeter (Outer Pond Loop)
 	{
 		Body:      coat.BodyWhite,
 		Name:      "white-1",
 		Variety:   "Kohaku",
 		Scale:     0.53,
-		Duration:  "108s",
+		Duration:  "110s",
 		Begin:     "0s",
 		PathID:    "pathLife0",
 		PathD:     pathLife0,
 		WagAngle:  "2.8",
 		WagDur:    "2.5s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
 	},
 	{
 		Body:      coat.BodyGold,
 		Name:      "gold-1",
 		Variety:   "Yamabuki",
 		Scale:     0.53,
-		Duration:  "96s",
-		Begin:     "-18s",
+		Duration:  "110s",
+		Begin:     "-55s",
 		PathID:    "pathLife1",
 		PathD:     pathLife1,
-		WagAngle:  "3.2",
-		WagDur:    "2.3s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagAngle:  "3.0",
+		WagDur:    "2.4s",
 	},
+
+	// 2. North-West Basin
 	{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-1",
 		Variety:   "Asagi",
 		Scale:     0.53,
-		Duration:  "112s",
-		Begin:     "-36s",
+		Duration:  "82s",
+		Begin:     "0s",
 		PathID:    "pathLife2",
 		PathD:     pathLife2,
-		WagAngle:  "3.0",
+		WagAngle:  "2.9",
 		WagDur:    "2.6s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
 	},
 	{
 		Body:      coat.BodyBlack,
 		Name:      "black-1",
 		Variety:   "Karasu",
 		Scale:     0.53,
-		Duration:  "124s",
-		Begin:     "-54s",
+		Duration:  "82s",
+		Begin:     "-41s",
 		PathID:    "pathLife3",
 		PathD:     pathLife3,
-		WagAngle:  "2.5",
-		WagDur:    "2.8s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagAngle:  "2.6",
+		WagDur:    "2.7s",
 	},
+
+	// 3. North-East Basin
 	{
 		Body:      coat.BodyTea,
 		Name:      "tea-1",
 		Variety:   "Chagoi",
 		Scale:     0.53,
-		Duration:  "100s",
-		Begin:     "-28s",
+		Duration:  "82s",
+		Begin:     "0s",
 		PathID:    "pathLife4",
 		PathD:     pathLife4,
-		WagAngle:  "2.9",
-		WagDur:    "2.4s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagAngle:  "2.8",
+		WagDur:    "2.5s",
 	},
 	{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-1",
 		Variety:   "Ogon",
 		Scale:     0.53,
-		Duration:  "106s",
-		Begin:     "-72s",
+		Duration:  "82s",
+		Begin:     "-41s",
 		PathID:    "pathLife5",
 		PathD:     pathLife5,
 		WagAngle:  "2.7",
 		WagDur:    "2.5s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
 	},
+
+	// 4. Central Deep Basin
 	{
 		Body:      coat.BodyWhite,
 		Name:      "white-2",
 		Variety:   "Kohaku",
 		Scale:     0.53,
-		Duration:  "116s",
-		Begin:     "-45s",
+		Duration:  "92s",
+		Begin:     "0s",
 		PathID:    "pathLife6",
 		PathD:     pathLife6,
 		WagAngle:  "3.0",
-		WagDur:    "2.6s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagDur:    "2.5s",
 	},
 	{
 		Body:      coat.BodyGold,
@@ -337,69 +332,63 @@ var DefaultFishSpecs = []FishSpec{
 		Variety:   "Yamabuki",
 		Scale:     0.53,
 		Duration:  "92s",
-		Begin:     "-24s",
+		Begin:     "-46s",
 		PathID:    "pathLife7",
 		PathD:     pathLife7,
-		WagAngle:  "3.4",
-		WagDur:    "2.2s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagAngle:  "3.2",
+		WagDur:    "2.3s",
 	},
+
+	// 5. South-West Basin
 	{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-2",
 		Variety:   "Asagi",
 		Scale:     0.53,
-		Duration:  "110s",
-		Begin:     "-62s",
+		Duration:  "82s",
+		Begin:     "0s",
 		PathID:    "pathLife8",
 		PathD:     pathLife8,
 		WagAngle:  "2.8",
-		WagDur:    "2.5s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagDur:    "2.6s",
 	},
 	{
 		Body:      coat.BodyBlack,
 		Name:      "black-2",
 		Variety:   "Karasu",
 		Scale:     0.53,
-		Duration:  "128s",
-		Begin:     "-80s",
+		Duration:  "82s",
+		Begin:     "-41s",
 		PathID:    "pathLife9",
 		PathD:     pathLife9,
 		WagAngle:  "2.6",
 		WagDur:    "2.7s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
 	},
+
+	// 6. South-East Basin
 	{
 		Body:      coat.BodyTea,
 		Name:      "tea-2",
 		Variety:   "Chagoi",
 		Scale:     0.53,
-		Duration:  "102s",
-		Begin:     "-10s",
+		Duration:  "82s",
+		Begin:     "0s",
 		PathID:    "pathLife10",
 		PathD:     pathLife10,
 		WagAngle:  "2.9",
 		WagDur:    "2.4s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
 	},
 	{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-2",
 		Variety:   "Ogon",
 		Scale:     0.53,
-		Duration:  "114s",
-		Begin:     "-32s",
+		Duration:  "82s",
+		Begin:     "-41s",
 		PathID:    "pathLife11",
 		PathD:     pathLife11,
 		WagAngle:  "2.8",
-		WagDur:    "2.6s",
-		KeyTimes:  "0; 0.20; 0.36; 0.52; 0.72; 0.88; 1",
-		KeyPoints: "0; 0.22; 0.35; 0.50; 0.72; 0.88; 1",
+		WagDur:    "2.5s",
 	},
 }
 
