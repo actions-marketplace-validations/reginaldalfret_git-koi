@@ -229,6 +229,7 @@ var (
 )
 
 // DefaultFishSpecs defines 12 koi (2 of every variety).
+// Fish size is balanced medium scale (0.49 - 0.53, ~70-75px length), perfectly proportional to the pond.
 // Swimming speed is calm, steady, and realistic (90s - 128s per full pond cycle).
 // Lateral body turning uses subtle, gentle angles (2.5° - 3.5°) over relaxed breathing cycles (2.2s - 2.8s).
 var DefaultFishSpecs = []FishSpec{
@@ -236,7 +237,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyWhite,
 		Name:      "white-1",
 		Variety:   "Kohaku",
-		Scale:     0.45,
+		Scale:     0.52,
 		Duration:  "108s",
 		Begin:     "0s",
 		PathID:    "pathLife0",
@@ -250,7 +251,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyGold,
 		Name:      "gold-1",
 		Variety:   "Yamabuki",
-		Scale:     0.46,
+		Scale:     0.53,
 		Duration:  "96s",
 		Begin:     "-18s",
 		PathID:    "pathLife1",
@@ -264,7 +265,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-1",
 		Variety:   "Asagi",
-		Scale:     0.43,
+		Scale:     0.51,
 		Duration:  "112s",
 		Begin:     "-36s",
 		PathID:    "pathLife2",
@@ -278,7 +279,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyBlack,
 		Name:      "black-1",
 		Variety:   "Karasu",
-		Scale:     0.42,
+		Scale:     0.50,
 		Duration:  "124s",
 		Begin:     "-54s",
 		PathID:    "pathLife3",
@@ -292,7 +293,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyTea,
 		Name:      "tea-1",
 		Variety:   "Chagoi",
-		Scale:     0.44,
+		Scale:     0.52,
 		Duration:  "100s",
 		Begin:     "-28s",
 		PathID:    "pathLife4",
@@ -306,7 +307,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-1",
 		Variety:   "Ogon",
-		Scale:     0.43,
+		Scale:     0.51,
 		Duration:  "106s",
 		Begin:     "-72s",
 		PathID:    "pathLife5",
@@ -320,7 +321,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyWhite,
 		Name:      "white-2",
 		Variety:   "Kohaku",
-		Scale:     0.44,
+		Scale:     0.51,
 		Duration:  "116s",
 		Begin:     "-45s",
 		PathID:    "pathLife6",
@@ -334,7 +335,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyGold,
 		Name:      "gold-2",
 		Variety:   "Yamabuki",
-		Scale:     0.43,
+		Scale:     0.52,
 		Duration:  "92s",
 		Begin:     "-24s",
 		PathID:    "pathLife7",
@@ -348,7 +349,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyAsagi,
 		Name:      "asagi-2",
 		Variety:   "Asagi",
-		Scale:     0.42,
+		Scale:     0.50,
 		Duration:  "110s",
 		Begin:     "-62s",
 		PathID:    "pathLife8",
@@ -362,7 +363,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyBlack,
 		Name:      "black-2",
 		Variety:   "Karasu",
-		Scale:     0.41,
+		Scale:     0.49,
 		Duration:  "128s",
 		Begin:     "-80s",
 		PathID:    "pathLife9",
@@ -376,7 +377,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyTea,
 		Name:      "tea-2",
 		Variety:   "Chagoi",
-		Scale:     0.45,
+		Scale:     0.53,
 		Duration:  "102s",
 		Begin:     "-10s",
 		PathID:    "pathLife10",
@@ -390,7 +391,7 @@ var DefaultFishSpecs = []FishSpec{
 		Body:      coat.BodyPlatinum,
 		Name:      "platinum-2",
 		Variety:   "Ogon",
-		Scale:     0.42,
+		Scale:     0.51,
 		Duration:  "114s",
 		Begin:     "-32s",
 		PathID:    "pathLife11",
@@ -403,9 +404,18 @@ var DefaultFishSpecs = []FishSpec{
 }
 
 // RenderAquariumGifs renders animated GIFs for all 6 distinct koi coat varieties.
+// Aquarium koi are rendered as full-grown adult koi to showcase their markings and flowy fins.
 func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error) {
 	const restLoopFrames = 30
 	result := make(map[coat.KoiBody][]byte)
+
+	var aquariumDev koi.KoiDevelopment
+	if dev != nil {
+		aquariumDev = *dev
+	}
+	if aquariumDev.TotalContributions < koi.AdultContributions {
+		aquariumDev.TotalContributions = koi.AdultContributions
+	}
 
 	distinctBodies := []coat.KoiBody{
 		coat.BodyWhite,
@@ -419,7 +429,7 @@ func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error
 	for _, body := range distinctBodies {
 		frames := make([]*output.KoiFrame, restLoopFrames)
 		for i := uint32(0); i < restLoopFrames; i++ {
-			frames[i] = render.RenderSwimFrame(dev, body, behavior.Rest, i)
+			frames[i] = render.RenderSwimFrame(&aquariumDev, body, behavior.Rest, i)
 		}
 		gifBytes, err := output.EncodeScaledGIF(frames, 1)
 		if err != nil {
@@ -608,9 +618,9 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
     <animateTransform attributeName="transform" type="rotate"
       values="-%s; %s; -%s" dur="%s" repeatCount="indefinite"/>
     
-    <ellipse cx="0" cy="18" rx="34" ry="11" fill="#000b1f" opacity="0.28">
-      <animate attributeName="opacity" values="0.28;0.16;0.28" dur="3s" repeatCount="indefinite"/>
-      <animate attributeName="rx" values="34;40;34" dur="3s" repeatCount="indefinite"/>
+    <ellipse cx="0" cy="19" rx="38" ry="12" fill="#000b1f" opacity="0.25">
+      <animate attributeName="opacity" values="0.25;0.14;0.25" dur="3s" repeatCount="indefinite"/>
+      <animate attributeName="rx" values="38;45;38" dur="3s" repeatCount="indefinite"/>
     </ellipse>
 
     <g transform="scale(%.3f)">
