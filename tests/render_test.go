@@ -6,13 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/reginaldalfret/git-koi/pkg/behavior"
-	"github.com/reginaldalfret/git-koi/pkg/coat"
-	"github.com/reginaldalfret/git-koi/pkg/history"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
-	"github.com/reginaldalfret/git-koi/pkg/motion"
-	"github.com/reginaldalfret/git-koi/pkg/output"
-	"github.com/reginaldalfret/git-koi/pkg/render"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/behavior"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/motion"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/output"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/render"
 )
 
 func TestFullRenderPipeline(t *testing.T) {

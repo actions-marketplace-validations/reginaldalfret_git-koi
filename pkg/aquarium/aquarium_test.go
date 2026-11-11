@@ -8,9 +8,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/reginaldalfret/git-koi/pkg/coat"
-	"github.com/reginaldalfret/git-koi/pkg/history"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
 )
 
 func TestGenerateAquariumSVG(t *testing.T) {

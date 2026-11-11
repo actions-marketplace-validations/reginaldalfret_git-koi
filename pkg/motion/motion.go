@@ -3,7 +3,7 @@ package motion
 import (
 	"math"
 
-	"github.com/reginaldalfret/git-koi/pkg/behavior"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/behavior"
 )
 
 const (

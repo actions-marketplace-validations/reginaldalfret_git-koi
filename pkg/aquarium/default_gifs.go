@@ -1,6 +1,6 @@
 package aquarium
 
-import "github.com/reginaldalfret/git-koi/pkg/coat"
+import "github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
 
 // AuthenticOriginalKoiB64 holds the authentic 6 original koi color varieties
 // (Kohaku, Yamabuki, Asagi, Karasu, Chagoi, Ogon) with vivid 32-color palettes

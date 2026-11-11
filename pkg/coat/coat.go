@@ -4,9 +4,9 @@ import (
 	"math"
 	"sort"
 
-	"github.com/reginaldalfret/git-koi/pkg/history"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
-	"github.com/reginaldalfret/git-koi/pkg/markings"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/markings"
 )
 
 type RGBA [4]byte

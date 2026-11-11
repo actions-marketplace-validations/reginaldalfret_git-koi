@@ -6,11 +6,11 @@ import (
 	"math"
 	"strings"
 
-	"github.com/reginaldalfret/git-koi/pkg/behavior"
-	"github.com/reginaldalfret/git-koi/pkg/coat"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
-	"github.com/reginaldalfret/git-koi/pkg/output"
-	"github.com/reginaldalfret/git-koi/pkg/render"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/behavior"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/output"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/render"
 )
 
 // Pond constants
@@ -733,7 +733,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   <text x="0" y="4"
     font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
     font-size="9.5" font-weight="400" fill="#64748b" letter-spacing="0.8">
-    POWERED BY GIT-KOI (GO)
+    POWERED BY GIT-KOI-AQUARIUM (GO)
   </text>
 </g>
 

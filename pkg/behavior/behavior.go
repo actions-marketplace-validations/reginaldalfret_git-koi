@@ -1,7 +1,7 @@
 package behavior
 
 import (
-	"github.com/reginaldalfret/git-koi/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
 )
 
 // Behavior defines the day's movement style.

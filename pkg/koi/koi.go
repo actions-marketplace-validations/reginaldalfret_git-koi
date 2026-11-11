@@ -7,7 +7,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/reginaldalfret/git-koi/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
 )
 
 const (

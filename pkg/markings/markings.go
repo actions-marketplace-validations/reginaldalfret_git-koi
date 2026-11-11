@@ -3,7 +3,7 @@ package markings
 import (
 	"math"
 
-	"github.com/reginaldalfret/git-koi/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
 )
 
 const (

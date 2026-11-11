@@ -3,11 +3,11 @@ package render
 import (
 	"math"
 
-	"github.com/reginaldalfret/git-koi/pkg/behavior"
-	"github.com/reginaldalfret/git-koi/pkg/coat"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
-	"github.com/reginaldalfret/git-koi/pkg/motion"
-	"github.com/reginaldalfret/git-koi/pkg/output"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/behavior"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/motion"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/output"
 )
 
 const (

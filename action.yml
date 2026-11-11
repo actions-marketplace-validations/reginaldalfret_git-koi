@@ -1,5 +1,5 @@
-name: git-koi-action
-description: Draw a GitHub account's koi from its public activity as a looping GIF, a still PNG, and a preview, for a profile README.
+name: git-koi-aquarium
+description: Live animated SVG aquarium & dynamic koi pond drawn from your GitHub activity for your profile README.
 branding:
   icon: droplet
   color: blue

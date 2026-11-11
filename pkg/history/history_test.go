@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/reginaldalfret/git-koi/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
 )
 
 func TestParseAccountWithHistory(t *testing.T) {

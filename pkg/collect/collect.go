@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/reginaldalfret/git-koi/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
 )
 
 // GraphqlClient runs a GraphQL query against GitHub's API.

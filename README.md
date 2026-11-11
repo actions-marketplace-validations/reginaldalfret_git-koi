@@ -1,10 +1,10 @@
-# git-koi (Go Edition) 🐟
+# git-koi-aquarium 🐟
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--action-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-action)
-[![Go Reference](https://pkg.go.dev/badge/github.com/reginaldalfret/git-koi.svg)](https://pkg.go.dev/github.com/reginaldalfret/git-koi)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-aquarium)
+[![Go Reference](https://pkg.go.dev/badge/github.com/reginaldalfret/git-koi-aquarium.svg)](https://pkg.go.dev/github.com/reginaldalfret/git-koi-aquarium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Draw an animated, pixel-art koi fish from any GitHub account's public activity as a looping GIF, still PNG, and preview page for a profile README.
+Draw an animated, pixel-art koi fish and live moving SVG aquarium from any GitHub account's public activity as a looping GIF, still PNG, live aquarium, and preview page for a profile README.
 
 This repository is a native **Go rewrite** of [`git-koi`](https://github.com/yalongwastaken/git-koi), providing high-speed execution, deterministic pixel art generation, and zero external dependencies using Go's standard library (`image/gif`, `image/png`, `net/http`).
 
@@ -84,11 +84,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Draw GitHub Profile Koi
-        uses: reginaldalfret/git-koi@v1
+      - name: Draw GitHub Profile Koi Aquarium
+        uses: reginaldalfret/git-koi-aquarium@v1
         with:
           login: ${{ github.repository_owner }}
-          body: asagi
+          body: all
           output-dir: koi
           token: ${{ secrets.GITHUB_TOKEN }}
 

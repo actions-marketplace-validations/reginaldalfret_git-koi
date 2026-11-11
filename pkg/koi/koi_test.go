@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/reginaldalfret/git-koi/pkg/history"
-	"github.com/reginaldalfret/git-koi/pkg/koi"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/history"
+	"github.com/reginaldalfret/git-koi-aquarium/pkg/koi"
 )
 
 func TestDeriveKoiDevelopment(t *testing.T) {
