@@ -21,84 +21,112 @@ const (
 
 // FishSpec defines trajectory and visual properties for a koi in the aquarium.
 type FishSpec struct {
-	Body       coat.KoiBody
-	Name       string
-	Variety    string
-	Scale      float64
-	Duration   string
-	PathID     string
-	PathD      string
-	ShadowDx   int
-	ShadowDy   int
+	Body    coat.KoiBody
+	Name    string
+	Variety string
+	Scale   float64
+	// Animation
+	Duration string
+	Begin    string // negative offset to stagger fish start positions on their figure-8
+	PathID   string
+	// figure-8 path: M cx,cy C ... (two mirrored loops)
+	PathD string
 }
 
-// DefaultFishSpecs defines the 6 distinct natural swimming paths with non-repeating prime periods.
+// figure8Path generates a smooth figure-8 (lemniscate) SVG path.
+// cx,cy = centre crossover point; rx = half-width of each loop; ry = half-height of each loop.
+// The fish starts at the centre, loops right, returns, loops left, returns.
+func figure8Path(cx, cy, rx, ry int) string {
+	// Control-point offset — 0.55 * radius gives a near-circular bezier loop
+	cpx := int(float64(rx) * 0.72)
+	cpy := int(float64(ry) * 0.72)
+	rx1 := cx + rx
+	rx0 := cx - rx
+
+	return fmt.Sprintf(
+		"M %d,%d C %d,%d %d,%d %d,%d C %d,%d %d,%d %d,%d C %d,%d %d,%d %d,%d C %d,%d %d,%d %d,%d Z",
+		// Start at centre
+		cx, cy,
+		// Right loop — upper arc
+		cx+cpx, cy-cpy, rx1, cy-cpy, rx1, cy,
+		// Right loop — lower arc  
+		rx1, cy+cpy, cx+cpx, cy+cpy, cx, cy,
+		// Left loop — lower arc
+		cx-cpx, cy+cpy, rx0, cy+cpy, rx0, cy,
+		// Left loop — upper arc
+		rx0, cy-cpy, cx-cpx, cy-cpy, cx, cy,
+	)
+}
+
+// DefaultFishSpecs defines 6 koi with individual figure-8 swim paths.
+// Paths vary in size and centre so fish spread naturally across the pond.
+// Begin offsets place each fish at a different starting point on its path.
 var DefaultFishSpecs = []FishSpec{
 	{
 		Body:     coat.BodyAsagi,
 		Name:     "asagi",
 		Variety:  "Asagi",
-		Scale:    0.42,
+		Scale:    0.44,
 		Duration: "31s",
+		Begin:    "0s",
 		PathID:   "swimPathAsagi",
-		PathD:    "M 150 180 C 220 120, 380 90, 520 130 C 660 170, 780 140, 860 210 C 920 270, 880 340, 780 350 C 640 360, 560 280, 440 270 C 300 260, 180 360, 110 300 C 60 250, 90 220, 150 180 Z",
-		ShadowDx: 14,
-		ShadowDy: 20,
+		// Large figure-8 spanning full pond, centred at (500,200)
+		PathD: figure8Path(500, 200, 360, 115),
 	},
 	{
 		Body:     coat.BodyBlack,
 		Name:     "black",
 		Variety:  "Karasu",
-		Scale:    0.40,
-		Duration: "39s",
+		Scale:    0.42,
+		Duration: "43s",
+		Begin:    "-20s",
 		PathID:   "swimPathBlack",
-		PathD:    "M 820 140 C 740 100, 600 130, 480 200 C 340 280, 240 260, 160 330 C 100 380, 160 400, 260 380 C 400 350, 460 310, 600 320 C 760 330, 880 290, 910 220 C 930 160, 880 160, 820 140 Z",
-		ShadowDx: 16,
-		ShadowDy: 24,
+		// Wide but lower figure-8, centred at (500,240)
+		PathD: figure8Path(500, 240, 380, 125),
 	},
 	{
 		Body:     coat.BodyGold,
 		Name:     "gold",
 		Variety:  "Yamabuki",
-		Scale:    0.44,
+		Scale:    0.46,
 		Duration: "23s",
+		Begin:    "-8s",
 		PathID:   "swimPathGold",
-		PathD:    "M 300 280 C 200 320, 120 220, 200 140 C 280 80, 420 110, 550 170 C 680 230, 750 110, 830 120 C 910 140, 920 230, 840 280 C 720 350, 620 240, 500 220 C 400 200, 360 260, 300 280 Z",
-		ShadowDx: 12,
-		ShadowDy: 18,
+		// Smaller upper figure-8, centred at (500,170)
+		PathD: figure8Path(500, 170, 270, 90),
 	},
 	{
 		Body:     coat.BodyPlatinum,
 		Name:     "platinum",
 		Variety:  "Ogon",
-		Scale:    0.43,
-		Duration: "43s",
+		Scale:    0.44,
+		Duration: "37s",
+		Begin:    "-30s",
 		PathID:   "swimPathPlatinum",
-		PathD:    "M 500 340 C 350 350, 220 320, 180 240 C 140 160, 230 100, 360 80 C 520 60, 680 70, 800 110 C 900 150, 940 240, 880 300 C 800 370, 660 330, 500 340 Z",
-		ShadowDx: 15,
-		ShadowDy: 22,
+		// Medium figure-8, offset left, centred at (460,210)
+		PathD: figure8Path(460, 210, 320, 110),
 	},
 	{
 		Body:     coat.BodyTea,
 		Name:     "tea",
 		Variety:  "Chagoi",
-		Scale:    0.41,
+		Scale:    0.42,
 		Duration: "29s",
+		Begin:    "-13s",
 		PathID:   "swimPathTea",
-		PathD:    "M 650 220 C 580 160, 490 150, 410 190 C 320 240, 310 320, 400 350 C 500 380, 600 330, 710 310 C 800 290, 850 210, 790 160 C 730 120, 700 260, 650 220 Z",
-		ShadowDx: 14,
-		ShadowDy: 20,
+		// Medium figure-8, offset right, centred at (540,195)
+		PathD: figure8Path(540, 195, 300, 100),
 	},
 	{
 		Body:     coat.BodyWhite,
 		Name:     "white",
 		Variety:  "Kohaku",
-		Scale:    0.42,
-		Duration: "37s",
+		Scale:    0.44,
+		Duration: "41s",
+		Begin:    "-36s",
 		PathID:   "swimPathWhite",
-		PathD:    "M 450 90 C 580 80, 720 140, 790 200 C 860 270, 780 340, 690 320 C 580 300, 520 230, 420 250 C 300 280, 240 200, 280 140 C 320 90, 380 90, 450 90 Z",
-		ShadowDx: 13,
-		ShadowDy: 19,
+		// Large figure-8, slight downward offset, centred at (500,220)
+		PathD: figure8Path(500, 220, 350, 118),
 	},
 }
 
@@ -113,7 +141,6 @@ func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error
 		for i := uint32(0); i < frameCount; i++ {
 			frames[i] = render.RenderSwimFrame(dev, spec.Body, b, i)
 		}
-		// Scale = 1 produces compact ~35KB GIF per fish
 		gifBytes, err := output.EncodeScaledGIF(frames, 1)
 		if err != nil {
 			return nil, fmt.Errorf("encoding %s koi: %w", spec.Name, err)
@@ -124,11 +151,19 @@ func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error
 	return result, nil
 }
 
-// GenerateAquariumSVG builds the self-contained animated SVG aquarium containing all 6 moving fishes.
-func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs map[coat.KoiBody][]byte) (string, error) {
-	if koiGifs == nil {
+// GenerateAquariumSVG builds the self-contained animated SVG aquarium.
+// koiGifs: pre-rendered GIF bytes per body. If nil, they are rendered from dev.
+func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, error) {
+	// Accept map[coat.KoiBody][]byte or nil
+	var gifMap map[coat.KoiBody][]byte
+	switch v := koiGifs.(type) {
+	case map[coat.KoiBody][]byte:
+		gifMap = v
+	}
+
+	if gifMap == nil {
 		var err error
-		koiGifs, err = RenderAquariumGifs(dev)
+		gifMap, err = RenderAquariumGifs(dev)
 		if err != nil {
 			return "", err
 		}
@@ -136,58 +171,110 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs map[coat.KoiBody][]byt
 
 	var sb strings.Builder
 
-	sb.WriteString(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d" width="100%%" height="auto" style="border-radius:16px; overflow:hidden; background:#070d19;">
+	sb.WriteString(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d" width="100%%" style="border-radius:16px; overflow:hidden; display:block; background:#050d1a;">
 <defs>
-  <!-- Water Gradients -->
-  <radialGradient id="pondDeep" cx="50%%" cy="45%%" r="60%%">
-    <stop offset="0%%" stop-color="#0c233c" stop-opacity="0.9"/>
-    <stop offset="55%%" stop-color="#071526" stop-opacity="0.95"/>
-    <stop offset="100%%" stop-color="#030710" stop-opacity="1"/>
+
+  <!-- ═══ WATER GRADIENTS ═══ -->
+  <radialGradient id="pondDeep" cx="50%%" cy="45%%" r="65%%">
+    <stop offset="0%%" stop-color="#0a2040" stop-opacity="0.95"/>
+    <stop offset="50%%" stop-color="#061428" stop-opacity="0.98"/>
+    <stop offset="100%%" stop-color="#020810" stop-opacity="1"/>
   </radialGradient>
 
-  <linearGradient id="surfaceGlow" x1="0%%" y1="0%%" x2="100%%" y2="100%%">
-    <stop offset="0%%" stop-color="#14b8a6" stop-opacity="0.12"/>
-    <stop offset="50%%" stop-color="#38bdf8" stop-opacity="0.05"/>
-    <stop offset="100%%" stop-color="#0284c7" stop-opacity="0.15"/>
+  <linearGradient id="surfaceShimmer" x1="0%%" y1="0%%" x2="100%%" y2="100%%">
+    <stop offset="0%%" stop-color="#0ea5e9" stop-opacity="0.08"/>
+    <stop offset="50%%" stop-color="#06b6d4" stop-opacity="0.04"/>
+    <stop offset="100%%" stop-color="#0284c7" stop-opacity="0.10"/>
   </linearGradient>
 
-  <!-- Soft Shadow Filter for Fish Depth -->
-  <filter id="pondShadow" x="-30%%" y="-30%%" width="160%%" height="160%%">
-    <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
-    <feColorMatrix type="matrix" values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.35 0"/>
-    <feOffset dx="6" dy="10"/>
-    <feBlend in="SourceGraphic" in2="blurOut" mode="normal"/>
+  <radialGradient id="vignette" cx="50%%" cy="50%%" r="70%%">
+    <stop offset="60%%" stop-color="#000000" stop-opacity="0"/>
+    <stop offset="100%%" stop-color="#000000" stop-opacity="0.55"/>
+  </radialGradient>
+
+  <!-- ═══ FILTERS ═══ -->
+  <filter id="causticGlow" x="-20%%" y="-20%%" width="140%%" height="140%%">
+    <feGaussianBlur stdDeviation="6" result="blur"/>
+    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
   </filter>
 
-  <!-- Caustic Light Shaft Filter -->
-  <filter id="causticBlur">
-    <feGaussianBlur stdDeviation="8"/>
+  <filter id="padShadow" x="-20%%" y="-20%%" width="140%%" height="140%%">
+    <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000b1f" flood-opacity="0.5"/>
   </filter>
 
-  <!-- Reusable Lily Pad -->
-  <g id="lilyPadLarge">
-    <path d="M 0 0 L 35 -15 A 38 38 0 1 1 -35 -15 Z" fill="#1b4d2e" stroke="#2d7a46" stroke-width="1.5"/>
-    <path d="M 0 0 L 28 -30 M 0 0 L -28 -30 M 0 0 L -38 0 M 0 0 L 38 0 M 0 0 L -20 28 M 0 0 L 20 28" stroke="#163e25" stroke-width="0.8" opacity="0.6"/>
-  </g>
-  <g id="lilyPadMedium">
-    <path d="M 0 0 L 25 -10 A 28 28 0 1 1 -25 -10 Z" fill="#235c37" stroke="#3b9657" stroke-width="1.2"/>
-    <path d="M 0 0 L 20 -20 M 0 0 L -20 -20 M 0 0 L -28 0 M 0 0 L 28 0" stroke="#1a462a" stroke-width="0.7" opacity="0.6"/>
-  </g>
-
-  <!-- Reusable Floating Lotus Flower -->
-  <g id="lotusFlower">
-    <ellipse cx="-4" cy="-3" rx="10" ry="5" fill="#fbcfe8" transform="rotate(-30)" opacity="0.85"/>
-    <ellipse cx="4" cy="-3" rx="10" ry="5" fill="#fbcfe8" transform="rotate(30)" opacity="0.85"/>
-    <ellipse cx="0" cy="-6" rx="10" ry="5" fill="#fdf2f8" opacity="0.95"/>
-    <ellipse cx="-5" cy="2" rx="9" ry="4" fill="#f472b6" transform="rotate(-60)" opacity="0.75"/>
-    <ellipse cx="5" cy="2" rx="9" ry="4" fill="#f472b6" transform="rotate(60)" opacity="0.75"/>
-    <circle cx="0" cy="-1" r="3.5" fill="#fef08a"/>
+  <!-- ═══ LILY PAD SYMBOLS ═══ -->
+  <!-- Large organic lily pad — wedge notch, curved veins -->
+  <g id="lilyLg">
+    <path d="M 0 0 C 8 -6, 20 -12, 32 -10 C 42 -8, 46 2, 44 10 C 42 20, 36 28, 26 32 C 14 36, 2 34, -8 28 C -20 22, -28 10, -26 -2 C -24 -12, -14 -18, -6 -16 C -4 -16, -2 -14, 0 0 Z"
+      fill="#1a4d2e" stroke="#2d7a46" stroke-width="1.2" opacity="0.92"/>
+    <path d="M 0 0 L -4 -16" stroke="#3b9657" stroke-width="1" opacity="0.7"/>
+    <path d="M 0 0 C 6 -4, 20 -8, 32 -10" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 0 0 C 10 2, 30 4, 44 10" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 0 0 C 8 10, 18 22, 26 32" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 0 0 C -4 10, -10 22, -8 28" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 0 0 C -10 2, -22 6, -26 -2" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 0 0 C -8 -6, -16 -12, -6 -16" stroke="#4ade80" stroke-width="0.9" fill="none" opacity="0.45"/>
+    <path d="M 10 -6 C 16 -8, 22 -6, 24 -2" stroke="#86efac" stroke-width="1.2" fill="none" opacity="0.50"/>
   </g>
 
-  <!-- Motion Paths -->
+  <!-- Medium lily pad -->
+  <g id="lilyMd">
+    <path d="M 0 0 C 6 -4, 14 -8, 22 -7 C 30 -6, 32 2, 30 8 C 28 15, 22 20, 14 22 C 6 24, -2 22, -8 16 C -14 10, -16 2, -14 -4 C -12 -10, -6 -12, -2 -10 C -1 -10, 0 -6, 0 0 Z"
+      fill="#235c37" stroke="#3b9657" stroke-width="1" opacity="0.90"/>
+    <path d="M 0 0 C 4 -3, 14 -6, 22 -7" stroke="#4ade80" stroke-width="0.7" fill="none" opacity="0.40"/>
+    <path d="M 0 0 C 8 2, 22 4, 30 8" stroke="#4ade80" stroke-width="0.7" fill="none" opacity="0.40"/>
+    <path d="M 0 0 C 6 8, 12 16, 14 22" stroke="#4ade80" stroke-width="0.7" fill="none" opacity="0.40"/>
+    <path d="M 0 0 C -6 6, -10 14, -8 16" stroke="#4ade80" stroke-width="0.7" fill="none" opacity="0.40"/>
+    <path d="M 0 0 C -8 0, -14 -2, -14 -4" stroke="#4ade80" stroke-width="0.7" fill="none" opacity="0.40"/>
+    <path d="M 6 -4 C 10 -6, 14 -4, 15 -2" stroke="#86efac" stroke-width="0.9" fill="none" opacity="0.45"/>
+  </g>
+
+  <!-- Small lily pad -->
+  <g id="lilySm">
+    <path d="M 0 0 C 4 -3, 10 -5, 15 -4 C 20 -3, 22 2, 20 6 C 18 10, 12 14, 6 14 C 0 14, -6 10, -8 5 C -10 0, -8 -4, -4 -6 C -2 -7, -1 -4, 0 0 Z"
+      fill="#1e5c33" stroke="#2d8a4e" stroke-width="0.8" opacity="0.88"/>
+    <path d="M 0 0 C 4 -2, 10 -4, 15 -4" stroke="#4ade80" stroke-width="0.6" fill="none" opacity="0.38"/>
+    <path d="M 0 0 C 6 4, 10 10, 6 14"  stroke="#4ade80" stroke-width="0.6" fill="none" opacity="0.38"/>
+    <path d="M 0 0 C -4 2, -8 4, -8 5"  stroke="#4ade80" stroke-width="0.6" fill="none" opacity="0.38"/>
+  </g>
+
+  <!-- Lotus flower -->
+  <g id="lotus">
+    <path d="M 0 0 C -3 -6, -2 -14, 0 -16 C 2 -14, 3 -6, 0 0 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.5" opacity="0.88"/>
+    <path d="M 0 0 C -3 -6, -2 -14, 0 -16 C 2 -14, 3 -6, 0 0 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.5" opacity="0.88" transform="rotate(72)"/>
+    <path d="M 0 0 C -3 -6, -2 -14, 0 -16 C 2 -14, 3 -6, 0 0 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.5" opacity="0.88" transform="rotate(144)"/>
+    <path d="M 0 0 C -3 -6, -2 -14, 0 -16 C 2 -14, 3 -6, 0 0 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.5" opacity="0.88" transform="rotate(216)"/>
+    <path d="M 0 0 C -3 -6, -2 -14, 0 -16 C 2 -14, 3 -6, 0 0 Z" fill="#fbcfe8" stroke="#f9a8d4" stroke-width="0.5" opacity="0.88" transform="rotate(288)"/>
+    <path d="M 0 0 C -2 -4, -1 -10, 0 -11 C 1 -10, 2 -4, 0 0 Z" fill="#fdf2f8" opacity="0.95" transform="rotate(36)"/>
+    <path d="M 0 0 C -2 -4, -1 -10, 0 -11 C 1 -10, 2 -4, 0 0 Z" fill="#fdf2f8" opacity="0.95" transform="rotate(108)"/>
+    <path d="M 0 0 C -2 -4, -1 -10, 0 -11 C 1 -10, 2 -4, 0 0 Z" fill="#fdf2f8" opacity="0.95" transform="rotate(180)"/>
+    <path d="M 0 0 C -2 -4, -1 -10, 0 -11 C 1 -10, 2 -4, 0 0 Z" fill="#fdf2f8" opacity="0.95" transform="rotate(252)"/>
+    <path d="M 0 0 C -2 -4, -1 -10, 0 -11 C 1 -10, 2 -4, 0 0 Z" fill="#fdf2f8" opacity="0.95" transform="rotate(324)"/>
+    <circle cx="0" cy="0" r="4" fill="#fef08a"/>
+    <circle cx="0" cy="0" r="2" fill="#fde047"/>
+    <circle cx="0" cy="-3" r="0.8" fill="#f97316"/>
+    <circle cx="2.8" cy="-1" r="0.8" fill="#f97316"/>
+    <circle cx="1.8" cy="2.2" r="0.8" fill="#f97316"/>
+    <circle cx="-1.8" cy="2.2" r="0.8" fill="#f97316"/>
+    <circle cx="-2.8" cy="-1" r="0.8" fill="#f97316"/>
+  </g>
+
+  <!-- Lotus bud -->
+  <g id="lotusBud">
+    <path d="M 0 -10 C -4 -12, -6 -6, -4 0 C -2 4, 2 4, 4 0 C 6 -6, 4 -12, 0 -10 Z" fill="#f9a8d4" stroke="#ec4899" stroke-width="0.6"/>
+    <path d="M 0 -8 C -2 -10, -3 -4, -2 0 C -1 3, 1 3, 2 0 C 3 -4, 2 -10, 0 -8 Z" fill="#fdf2f8" opacity="0.9"/>
+    <line x1="0" y1="0" x2="0" y2="8" stroke="#2d7a46" stroke-width="1.2"/>
+  </g>
+
+  <!-- Algae wisp -->
+  <g id="algaeWisp">
+    <path d="M 0 0 C 4 -8, -4 -16, 2 -24 C 6 -18, -2 -10, 2 -4 C 4 0, 2 2, 0 0 Z" fill="#166534" opacity="0.65"/>
+    <path d="M 0 0 C -6 -6, 2 -14, -2 -20 C -4 -14, 4 -8, 0 -4 Z" fill="#15803d" opacity="0.55"/>
+  </g>
+
+  <!-- ═══ FIGURE-8 SWIM PATHS ═══ -->
 `, PondWidth, PondHeight))
 
-	// Write motion paths into <defs>
 	for _, spec := range DefaultFishSpecs {
 		sb.WriteString(fmt.Sprintf(`  <path id="%s" d="%s" fill="none"/>
 `, spec.PathID, spec.PathD))
@@ -195,125 +282,203 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs map[coat.KoiBody][]byt
 
 	sb.WriteString(`</defs>
 
-<!-- Pond Bed & Water Column -->
+<!-- ═══ POND BED ═══ -->
 <rect width="100%" height="100%" fill="url(#pondDeep)"/>
-<rect width="100%" height="100%" fill="url(#surfaceGlow)"/>
+<rect width="100%" height="100%" fill="url(#surfaceShimmer)"/>
 
-<!-- Ambient Sunlight Caustics -->
-<g opacity="0.18" filter="url(#causticBlur)">
-  <polygon points="120,0 280,0 420,420 180,420" fill="#38bdf8">
-    <animate attributeName="opacity" values="0.12;0.22;0.12" dur="8s" repeatCount="indefinite"/>
+<!-- ═══ WATER CAUSTICS ═══ -->
+<g filter="url(#causticGlow)">
+  <polygon points="60,0 180,0 320,420 160,420" fill="#38bdf8" opacity="0.07">
+    <animate attributeName="opacity" values="0.04;0.13;0.07;0.11;0.04" dur="7s" repeatCount="indefinite"/>
   </polygon>
-  <polygon points="460,0 640,0 800,420 540,420" fill="#2dd4bf">
-    <animate attributeName="opacity" values="0.15;0.26;0.15" dur="11s" repeatCount="indefinite"/>
+  <polygon points="380,0 500,0 580,420 380,420" fill="#06b6d4" opacity="0.06">
+    <animate attributeName="opacity" values="0.03;0.11;0.05;0.09;0.03" dur="9s" begin="1.5s" repeatCount="indefinite"/>
   </polygon>
-  <polygon points="760,0 920,0 1000,420 860,420" fill="#38bdf8">
-    <animate attributeName="opacity" values="0.10;0.20;0.10" dur="9s" repeatCount="indefinite"/>
+  <polygon points="720,0 840,0 940,420 820,420" fill="#38bdf8" opacity="0.05">
+    <animate attributeName="opacity" values="0.03;0.10;0.06;0.08;0.03" dur="8s" begin="3s" repeatCount="indefinite"/>
   </polygon>
+  <polygon points="240,0 280,0 340,420 240,420" fill="#bae6fd" opacity="0.05">
+    <animate attributeName="opacity" values="0.02;0.09;0.03;0.07;0.02" dur="11s" begin="2s" repeatCount="indefinite"/>
+  </polygon>
+
+  <!-- Dancing light patches on pond floor -->
+  <ellipse cx="160" cy="130" rx="22" ry="9" fill="#7dd3fc" opacity="0.14" transform="rotate(-15, 160, 130)">
+    <animate attributeName="opacity" values="0.08;0.22;0.10;0.18;0.08" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="22;30;20;28;22" dur="4s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="460" cy="80" rx="26" ry="10" fill="#38bdf8" opacity="0.12">
+    <animate attributeName="opacity" values="0.06;0.20;0.08;0.16;0.06" dur="5s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="26;18;30;22;26" dur="5s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="740" cy="150" rx="18" ry="7" fill="#7dd3fc" opacity="0.13">
+    <animate attributeName="opacity" values="0.07;0.21;0.09;0.17;0.07" dur="3.5s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="18;26;16;24;18" dur="3.5s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="300" cy="320" rx="24" ry="9" fill="#2dd4bf" opacity="0.11">
+    <animate attributeName="opacity" values="0.05;0.17;0.07;0.14;0.05" dur="6s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="24;16;28;20;24" dur="6s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="650" cy="350" rx="20" ry="8" fill="#38bdf8" opacity="0.12">
+    <animate attributeName="opacity" values="0.06;0.19;0.08;0.15;0.06" dur="4.5s" begin="1s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="20;28;18;26;20" dur="4.5s" begin="1s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="850" cy="260" rx="14" ry="6" fill="#7dd3fc" opacity="0.14">
+    <animate attributeName="opacity" values="0.08;0.24;0.10;0.20;0.08" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="14;20;12;18;14" dur="3s" repeatCount="indefinite"/>
+  </ellipse>
+  <ellipse cx="520" cy="250" rx="16" ry="6" fill="#93c5fd" opacity="0.10">
+    <animate attributeName="opacity" values="0.05;0.16;0.07;0.13;0.05" dur="5.5s" begin="2s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="16;22;14;20;16" dur="5.5s" begin="2s" repeatCount="indefinite"/>
+  </ellipse>
 </g>
 
-<!-- Animated Surface Ripples -->
-<g fill="none" stroke="#38bdf8" stroke-width="1.2" opacity="0.4">
-  <!-- Feeding Ring 1 (Center-Left) -->
-  <circle cx="340" cy="170" r="2">
-    <animate attributeName="r" values="2;55" dur="7s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.6;0" dur="7s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="340" cy="170" r="2">
-    <animate attributeName="r" values="2;55" dur="7s" begin="2.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.6;0" dur="7s" begin="2.5s" repeatCount="indefinite"/>
-  </circle>
+<!-- ═══ POND GRAVEL BED (subtle texture) ═══ -->
+<g opacity="0.15" fill="#1e3a5f">
+  <circle cx="80" cy="390" r="3"/><circle cx="150" cy="405" r="2"/><circle cx="220" cy="400" r="4"/>
+  <circle cx="310" cy="410" r="2"/><circle cx="400" cy="395" r="3"/><circle cx="490" cy="408" r="2"/>
+  <circle cx="560" cy="402" r="4"/><circle cx="650" cy="412" r="2"/><circle cx="730" cy="398" r="3"/>
+  <circle cx="820" cy="406" r="2"/><circle cx="900" cy="394" r="4"/><circle cx="960" cy="410" r="2"/>
+</g>
 
-  <!-- Feeding Ring 2 (Center-Right) -->
-  <circle cx="720" cy="250" r="2">
-    <animate attributeName="r" values="2;65" dur="9s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.55;0" dur="9s" repeatCount="indefinite"/>
-  </circle>
-  <circle cx="720" cy="250" r="2">
-    <animate attributeName="r" values="2;65" dur="9s" begin="3.2s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.55;0" dur="9s" begin="3.2s" repeatCount="indefinite"/>
-  </circle>
+<!-- ═══ BOTANICAL LAYER ═══ -->
+<g id="botanicals">
+  <!-- Top-left cluster -->
+  <g transform="translate(78, 68) rotate(-12)">
+    <use href="#lilyLg" filter="url(#padShadow)"/>
+  </g>
+  <g transform="translate(42, 110) rotate(35) scale(0.75)">
+    <use href="#lilyMd" filter="url(#padShadow)"/>
+  </g>
+  <g transform="translate(130, 55) rotate(5) scale(0.60)">
+    <use href="#lilySm"/>
+  </g>
+  <g transform="translate(84, 54) scale(1.4)">
+    <use href="#lotus"/>
+  </g>
+  <g transform="translate(52, 100) scale(1.0)">
+    <use href="#lotusBud"/>
+  </g>
+  <g transform="translate(20, 180) rotate(-8) scale(1.2)">
+    <use href="#algaeWisp"/>
+  </g>
+  <g transform="translate(10, 260) rotate(12) scale(0.9)">
+    <use href="#algaeWisp"/>
+  </g>
 
-  <!-- Feeding Ring 3 (Upper Right) -->
-  <circle cx="580" cy="90" r="2">
-    <animate attributeName="r" values="2;45" dur="6s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.5;0" dur="6s" repeatCount="indefinite"/>
+  <!-- Bottom-right cluster -->
+  <g transform="translate(892, 318) rotate(-25) scale(1.15)">
+    <use href="#lilyLg" filter="url(#padShadow)"/>
+  </g>
+  <g transform="translate(946, 274) rotate(80) scale(0.80)">
+    <use href="#lilyMd" filter="url(#padShadow)"/>
+  </g>
+  <g transform="translate(850, 362) rotate(-5) scale(0.65)">
+    <use href="#lilySm"/>
+  </g>
+  <g transform="translate(892, 300) scale(1.3)">
+    <use href="#lotus"/>
+  </g>
+  <g transform="translate(958, 265) scale(0.9)">
+    <use href="#lotusBud"/>
+  </g>
+  <g transform="translate(978, 140) rotate(5) scale(1.1)">
+    <use href="#algaeWisp"/>
+  </g>
+  <g transform="translate(985, 310) rotate(-10) scale(0.85)">
+    <use href="#algaeWisp"/>
+  </g>
+
+  <!-- Small corner accents -->
+  <g transform="translate(870, 50) rotate(15) scale(0.65)">
+    <use href="#lilyMd"/>
+  </g>
+  <g transform="translate(80, 362) rotate(20) scale(0.6)">
+    <use href="#lilySm"/>
+  </g>
+</g>
+
+<!-- ═══ SURFACE RIPPLES ═══ -->
+<g fill="none" stroke="#7dd3fc" stroke-width="1.0">
+  <circle cx="430" cy="95" r="3" opacity="0">
+    <animate attributeName="r" values="3;60" dur="8s" repeatCount="indefinite" begin="0s"/>
+    <animate attributeName="opacity" values="0.5;0" dur="8s" repeatCount="indefinite" begin="0s"/>
+  </circle>
+  <circle cx="430" cy="95" r="3" opacity="0">
+    <animate attributeName="r" values="3;60" dur="8s" repeatCount="indefinite" begin="2.6s"/>
+    <animate attributeName="opacity" values="0.5;0" dur="8s" repeatCount="indefinite" begin="2.6s"/>
+  </circle>
+  <circle cx="260" cy="210" r="3" opacity="0">
+    <animate attributeName="r" values="3;70" dur="10s" repeatCount="indefinite" begin="1s"/>
+    <animate attributeName="opacity" values="0.45;0" dur="10s" repeatCount="indefinite" begin="1s"/>
+  </circle>
+  <circle cx="750" cy="250" r="3" opacity="0">
+    <animate attributeName="r" values="3;55" dur="7s" repeatCount="indefinite" begin="3s"/>
+    <animate attributeName="opacity" values="0.50;0" dur="7s" repeatCount="indefinite" begin="3s"/>
+  </circle>
+  <circle cx="540" cy="350" r="3" opacity="0">
+    <animate attributeName="r" values="3;50" dur="6s" repeatCount="indefinite" begin="2s"/>
+    <animate attributeName="opacity" values="0.40;0" dur="6s" repeatCount="indefinite" begin="2s"/>
   </circle>
 </g>
 
-<!-- SWIMMING KOI FISH (6 NATIVE BODIES) -->
+<!-- ═══ SWIMMING KOI — ORIGINAL PIXEL-ART GIF SPRITES ON FIGURE-8 PATHS ═══ -->
 `)
 
-	// Render each fish
 	for _, spec := range DefaultFishSpecs {
-		gifData, ok := koiGifs[spec.Body]
-		if !ok || len(gifData) == 0 {
-			continue
-		}
+		gifData := gifMap[spec.Body]
 		b64 := base64.StdEncoding.EncodeToString(gifData)
 
 		sb.WriteString(fmt.Sprintf(`
-<!-- Koi: %s (%s) -->
+<!-- Koi: %s (%s) — figure-8 path -->
 <g id="fish-%s">
-  <!-- Fish Body & Dynamic Sprite -->
-  <g>
-    <animateMotion dur="%s" repeatCount="indefinite" rotate="auto">
-      <mpath xlink:href="#%s"/>
-    </animateMotion>
-    
-    <!-- Pond floor depth shadow -->
-    <ellipse cx="-%d" cy="%d" rx="42" ry="16" fill="#000000" opacity="0.32" filter="url(#pondShadow)"/>
-    
-    <!-- Swimming Animated Koi Sprite (centered at origin, facing tangent) -->
-    <g transform="scale(%.3f)">
-      <image xlink:href="data:image/gif;base64,%s" x="-128" y="-128" width="256" height="256" style="image-rendering:pixelated; image-rendering:crisp-edges;"/>
-    </g>
+  <animateMotion dur="%s" begin="%s" repeatCount="indefinite" rotate="auto" calcMode="linear">
+    <mpath xlink:href="#%s"/>
+  </animateMotion>
+  <!-- Soft pond-floor shadow -->
+  <ellipse cx="0" cy="20" rx="36" ry="12" fill="#000b1f" opacity="0.30">
+    <animate attributeName="opacity" values="0.30;0.18;0.30" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="rx" values="36;42;36" dur="3s" repeatCount="indefinite"/>
+  </ellipse>
+  <!-- Pixel-art koi sprite, centered, facing right (rotate="auto" steers it) -->
+  <g transform="scale(%.3f)">
+    <image xlink:href="data:image/gif;base64,%s"
+      x="-128" y="-128" width="256" height="256"
+      style="image-rendering:pixelated; image-rendering:crisp-edges;"/>
   </g>
 </g>
-`, spec.Name, spec.Variety, spec.Name, spec.Duration, spec.PathID, spec.ShadowDx, spec.ShadowDy, spec.Scale, b64))
+`, spec.Variety, spec.Name, spec.Name, spec.Duration, spec.Begin, spec.PathID, spec.Scale, b64))
 	}
 
 	sb.WriteString(`
-<!-- FLOATING BOTANICAL LILY PADS (Top Aquatic Layer) -->
-<g id="botanicals" opacity="0.92">
-  <!-- Top Left Cluster -->
-  <g transform="translate(110, 80) scale(1.1)">
-    <use href="#lilyPadLarge"/>
-  </g>
-  <g transform="translate(65, 120) scale(0.9) rotate(45)">
-    <use href="#lilyPadMedium"/>
-  </g>
-  <g transform="translate(115, 75) scale(0.8)">
-    <use href="#lotusFlower"/>
-  </g>
+<!-- ═══ VIGNETTE ═══ -->
+<rect width="100%" height="100%" fill="url(#vignette)"/>
 
-  <!-- Bottom Right Cluster -->
-  <g transform="translate(890, 330) scale(1.25) rotate(-30)">
-    <use href="#lilyPadLarge"/>
-  </g>
-  <g transform="translate(945, 290) scale(0.85) rotate(110)">
-    <use href="#lilyPadMedium"/>
-  </g>
-  <g transform="translate(895, 325) scale(0.9) rotate(-15)">
-    <use href="#lotusFlower"/>
-  </g>
-</g>
+<!-- ═══ GLASS FRAME ═══ -->
+<rect width="100%" height="100%" rx="16" ry="16" fill="none"
+  stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.28"/>
+<rect x="1.5" y="1.5" width="997" height="417" rx="14.5" ry="14.5" fill="none"
+  stroke="#0f172a" stroke-width="1.5" stroke-opacity="0.70"/>
+<rect x="8" y="2" width="984" height="3" rx="1.5" fill="white" opacity="0.06"/>
 
-<!-- Atmospheric HUD Overlay & Glass Edge -->
-<rect width="100%" height="100%" rx="16" ry="16" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.35"/>
-<rect x="1" y="1" width="998" height="418" rx="15" ry="15" fill="none" stroke="#0f172a" stroke-width="1" stroke-opacity="0.8"/>
-
-<!-- Subtle Aquarium Title Badge -->
-<g transform="translate(24, 30)" opacity="0.85">
-  <circle cx="0" cy="0" r="4" fill="#34d399">
-    <animate attributeName="opacity" values="0.4;1;0.4" dur="2s" repeatCount="indefinite"/>
+<!-- ═══ STATUS BADGE ═══ -->
+<g transform="translate(22, 28)" opacity="0.88">
+  <circle cx="0" cy="0" r="3.5" fill="#34d399">
+    <animate attributeName="opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite"/>
   </circle>
-  <text x="12" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="11" font-weight="600" fill="#94a3b8" letter-spacing="1.2">LIVE KOI AQUARIUM · 6 NATIVE ECOSYSTEM BODIES</text>
+  <text x="11" y="4"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    font-size="10.5" font-weight="600" fill="#94a3b8" letter-spacing="1.1">
+    LIVE KOI POND · 6 NATIVE ECOSYSTEM FISH
+  </text>
+</g>
+<g transform="translate(978, 28)" text-anchor="end" opacity="0.55">
+  <text x="0" y="4"
+    font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif"
+    font-size="9.5" font-weight="400" fill="#64748b" letter-spacing="0.8">
+    POWERED BY GIT-KOI (GO)
+  </text>
 </g>
 
-<g transform="translate(976, 30)" text-anchor="end" opacity="0.65">
-  <text x="0" y="4" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="10" font-weight="500" fill="#64748b" letter-spacing="0.8">POWERED BY GIT-KOI (GO)</text>
-</g>
 </svg>
 `)
 
