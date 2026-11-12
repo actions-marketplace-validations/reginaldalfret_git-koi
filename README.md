@@ -1,6 +1,7 @@
 # git-koi-aquarium 🐟
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-aquarium)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-action)
+[![CI](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml/badge.svg)](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/reginaldalfret/git-koi-aquarium?style=flat-square&color=blue)](https://github.com/reginaldalfret/git-koi-aquarium/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reginaldalfret/git-koi-aquarium.svg)](https://pkg.go.dev/github.com/reginaldalfret/git-koi-aquarium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -57,8 +58,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add koi/aquarium.svg
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update daily koi aquarium [skip ci]"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update daily koi aquarium [skip ci]"
+            git push
+          fi
 ```
 
 ### Step 2: Embed into Your Profile README
@@ -96,7 +99,7 @@ The aquarium and standalone generators feature 6 traditional koi color morphs wi
 
 - **100% Collision-Free Movement**: Fish swim across 6 non-overlapping spatial circuits (Perimeter, NW, NE, Center, SW, SE). Paired fish are phased at 180° offsets, ensuring **zero clumsy overlaps** and natural spacing.
 - **Natural Kinematics**: $C^1$-continuous Catmull-Rom cubic Bézier splines produce gentle, graceful glides without jerky tangents or rapid 360° spins.
-- **Refractive Water Caustics**: Animated light ribbons and pulsing organic cellular dapples simulate sunlight filtering through moving pond water.
+- **Deep Serene Water**: Clean, tranquil midnight-blue aquatic pond bed providing pristine clarity and high-contrast visibility for koi markings.
 - **Biological GitHub Activity Mapping**:
   - **Language Distribution** $\to$ Pigment hues (Beni red, Sumi black, Ki yellow, Orenji orange, Ai blue).
   - **Contribution Totals** $\to$ Logarithmic growth curves scaling body length and head proportions.
@@ -173,7 +176,7 @@ go build -o git-koi ./cmd/git-koi
 
 ## 🏗️ Go Packages
 
-- [`pkg/aquarium`](./pkg/aquarium): Full animated SVG aquarium engine, caustics generators, Catmull-Rom spline curves, and collision-free spatial circuits.
+- [`pkg/aquarium`](./pkg/aquarium): Full animated SVG aquarium engine, Catmull-Rom spline curves, and collision-free spatial circuits.
 - [`pkg/koi`](./pkg/koi): Development derivation, streak tracking, and logarithmic growth curves.
 - [`pkg/coat`](./pkg/coat): Pigment clustering, organic spot distribution, and coat variety definitions.
 - [`pkg/behavior`](./pkg/behavior): Daily behavioral state machines (Rest, Surface Feeding, Dart, Cruise).

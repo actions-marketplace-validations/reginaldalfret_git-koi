@@ -18,7 +18,7 @@ import (
 	"github.com/reginaldalfret/git-koi-aquarium/pkg/render"
 )
 
-const version = "1.1.0"
+const version = "1.2.0"
 
 const usage = `Usage: git-koi collect LOGIN [--output FILE]
        git-koi render SNAPSHOT --output-dir DIR [--body BODY]
@@ -266,15 +266,26 @@ func runAquarium(snapshotPath, outputDir string) error {
 
 func replaceFile(path string, data []byte) error {
 	dir := filepath.Dir(path)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return err
+	}
 	base := filepath.Base(path)
-	tmpPath := filepath.Join(dir, base+".tmp")
-
-	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
+	tmpFile, err := os.CreateTemp(dir, base+".*.tmp")
+	if err != nil {
 		return err
 	}
-	if err := os.Rename(tmpPath, path); err != nil {
+	tmpPath := tmpFile.Name()
+	defer func() {
 		_ = os.Remove(tmpPath)
+	}()
+
+	if _, err := tmpFile.Write(data); err != nil {
+		_ = tmpFile.Close()
 		return err
 	}
-	return nil
+	if err := tmpFile.Close(); err != nil {
+		return err
+	}
+
+	return os.Rename(tmpPath, path)
 }

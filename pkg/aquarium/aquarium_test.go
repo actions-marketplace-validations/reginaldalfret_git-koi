@@ -84,3 +84,84 @@ func TestGenerateAquariumSVG(t *testing.T) {
 
 	t.Logf("SVG verified: 12 fish, all executing full life cycle movements (oval, sprint, hover, zig-zag, fig-8)")
 }
+
+func TestActivityDependentPersonalization(t *testing.T) {
+	goColor, _ := history.ParseLanguageColor("#00ADD8")
+	rubyColor, _ := history.ParseLanguageColor("#701516")
+
+	devGo := &koi.KoiDevelopment{
+		IdentitySeed:       11111,
+		TotalContributions: 1200,
+		ObservedOn:         history.NewDate(2026, 11, 10),
+		LanguageShares: map[string]float64{
+			"Go": 1.0,
+		},
+		LanguageColors: map[string]*history.LanguageColor{
+			"Go": &goColor,
+		},
+	}
+
+	devRuby := &koi.KoiDevelopment{
+		IdentitySeed:       99999,
+		TotalContributions: 5400,
+		ObservedOn:         history.NewDate(2026, 11, 10),
+		LanguageShares: map[string]float64{
+			"Ruby": 1.0,
+		},
+		LanguageColors: map[string]*history.LanguageColor{
+			"Ruby": &rubyColor,
+		},
+	}
+
+	// 1. Generate SVG for Go account (with nil koiGifs, so it triggers activity-derived rendering)
+	svgGo1, err := GenerateAquariumSVG(devGo, nil)
+	if err != nil {
+		t.Fatalf("GenerateAquariumSVG(devGo) failed: %v", err)
+	}
+
+	// 2. Generate SVG for Ruby account
+	svgRuby, err := GenerateAquariumSVG(devRuby, nil)
+	if err != nil {
+		t.Fatalf("GenerateAquariumSVG(devRuby) failed: %v", err)
+	}
+
+	// 3. Proves activity personalization: Materially different accounts MUST produce different visual SVGs
+	if svgGo1 == svgRuby {
+		t.Errorf("expected different aquarium SVGs for Go vs Ruby accounts, but got identical SVGs (P0 bug check failed)")
+	}
+
+	// 4. Proves P0 resolution: SVG MUST NOT fall back to static bundled base64 string when dev is provided
+	staticWhiteB64 := AuthenticOriginalKoiB64[coat.BodyWhite]
+	if strings.Contains(svgGo1, staticWhiteB64) {
+		t.Errorf("svgGo contains hardcoded static base64 GIF instead of activity-derived GIF (P0 bug check failed)")
+	}
+	if strings.Contains(svgRuby, staticWhiteB64) {
+		t.Errorf("svgRuby contains hardcoded static base64 GIF instead of activity-derived GIF (P0 bug check failed)")
+	}
+
+	// 5. Proves determinism: Identical inputs MUST produce byte-identical SVGs
+	svgGo2, err := GenerateAquariumSVG(devGo, nil)
+	if err != nil {
+		t.Fatalf("second GenerateAquariumSVG(devGo) failed: %v", err)
+	}
+	if svgGo1 != svgGo2 {
+		t.Errorf("expected deterministic SVG generation for identical development input, but outputs differed")
+	}
+
+	t.Logf("Activity-dependent personalization verified: Go and Ruby accounts produced distinct visual fish deterministically")
+}
+
+func TestOfflineFallbackWhenDevNil(t *testing.T) {
+	// When dev is nil, it should gracefully fall back to the bundled authentic assets
+	svg, err := GenerateAquariumSVG(nil, nil)
+	if err != nil {
+		t.Fatalf("GenerateAquariumSVG(nil, nil) failed: %v", err)
+	}
+	staticWhiteB64 := AuthenticOriginalKoiB64[coat.BodyWhite]
+	if !strings.Contains(svg, staticWhiteB64) {
+		t.Errorf("expected bundled static base64 asset when dev is nil, but not found")
+	}
+	if !strings.HasPrefix(svg, "<svg") || !strings.HasSuffix(strings.TrimSpace(svg), "</svg>") {
+		t.Errorf("invalid SVG wrapper for fallback aquarium")
+	}
+}

@@ -186,6 +186,9 @@ func collectRepositories(client GraphqlClient, login string, languageColors map[
 			break
 		}
 		nextCursor, _ := pageInfo["endCursor"].(string)
+		if nextCursor == "" {
+			return nil, fmt.Errorf("%s reported hasNextPage with empty endCursor", connName)
+		}
 		if nextCursor == cursor {
 			return nil, fmt.Errorf("%s repeated page cursor %s", connName, nextCursor)
 		}
@@ -318,13 +321,13 @@ func collectCalendarWindow(client GraphqlClient, login string, windowStart, wind
 			windowCounts[d] = count
 		}
 
-		if earliest == nil {
-			return windowCounts, nil
-		}
-		if earliest.Equal(windowStart.Time) {
+		if earliest == nil || earliest.Equal(windowStart.Time) || earliest.Before(windowStart.Time) {
 			return windowCounts, nil
 		}
 		reqEnd = earliest.AddDays(-1)
+		if reqEnd.Before(windowStart.Time) {
+			return windowCounts, nil
+		}
 	}
 }
 

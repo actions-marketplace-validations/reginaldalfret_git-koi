@@ -22,9 +22,9 @@ runs:
   using: composite
   steps:
     - name: Set up Go
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v7
       with:
-        go-version: '>=1.22'
+        go-version-file: '${{ github.action_path }}/go.mod'
 
     - name: Build git-koi binary
       shell: bash

@@ -180,21 +180,21 @@ var (
 )
 
 const (
-	WhitePatchScore         = 0.5
-	PatchCoverage           = 0.58
-	PatchSpanStart          = 0.02
-	PatchSpanEnd            = 0.86
-	VarietyPull             = 0.25
-	VarietyVoteWeight       = 0.16 * VarietyPull
-	SpotSpanStart           = 0.12
-	SpotSpanEnd             = 0.8
-	SpotLateralLimit        = 0.8
-	FinRootTintFraction     = 0.4 * VarietyPull
-	StreakFinStartFraction  = 0.55
-	DullSaturation          = 0.3
-	VividSaturationGain     = 0.3
-	DullDarkening           = 0.15
-	VividBrightening        = 0.12
+	WhitePatchScore        = 0.5
+	PatchCoverage          = 0.58
+	PatchSpanStart         = 0.02
+	PatchSpanEnd           = 0.86
+	VarietyPull            = 0.25
+	VarietyVoteWeight      = 0.16 * VarietyPull
+	SpotSpanStart          = 0.12
+	SpotSpanEnd            = 0.8
+	SpotLateralLimit       = 0.8
+	FinRootTintFraction    = 0.4 * VarietyPull
+	StreakFinStartFraction = 0.55
+	DullSaturation         = 0.3
+	VividSaturationGain    = 0.3
+	DullDarkening          = 0.15
+	VividBrightening       = 0.12
 )
 
 type KoiBody int
@@ -422,13 +422,13 @@ type PigmentShare struct {
 }
 
 type KoiCoat struct {
-	IdentitySeed   uint64
-	KoiBody        KoiBody
-	PigmentShares  []PigmentShare
-	PatchBiases    []float64
-	SpotThreshold  float64
-	ColorFraction  float64
-	StreakMarks    markings.StreakMarks
+	IdentitySeed  uint64
+	KoiBody       KoiBody
+	PigmentShares []PigmentShare
+	PatchBiases   []float64
+	SpotThreshold float64
+	ColorFraction float64
+	StreakMarks   markings.StreakMarks
 }
 
 func NewKoiCoat(dev *koi.KoiDevelopment, body KoiBody, calcHalfWidth func(float64) float64) *KoiCoat {
@@ -727,8 +727,9 @@ func selectPigment(color *history.LanguageColor) Pigment {
 	minC := math.Min(r, math.Min(g, b))
 	chroma := maxC - minC
 	lightness := (maxC + minC) / 2.0
+	denom := 1.0 - math.Abs(2.0*lightness-1.0)
 
-	if chroma < minChroma || chroma/(1.0-math.Abs(2.0*lightness-1.0)) < minSaturation {
+	if chroma < minChroma || denom <= 1e-6 || chroma/denom < minSaturation {
 		return PigmentSumi
 	}
 

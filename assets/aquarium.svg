@@ -8,23 +8,12 @@
     <stop offset="100%" stop-color="#020810" stop-opacity="1"/>
   </radialGradient>
 
-  <linearGradient id="surfaceShimmer" x1="0%" y1="0%" x2="100%" y2="100%">
-    <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.08"/>
-    <stop offset="50%" stop-color="#06b6d4" stop-opacity="0.04"/>
-    <stop offset="100%" stop-color="#0284c7" stop-opacity="0.10"/>
-  </linearGradient>
-
   <radialGradient id="vignette" cx="50%" cy="50%" r="70%">
     <stop offset="60%" stop-color="#000000" stop-opacity="0"/>
     <stop offset="100%" stop-color="#000000" stop-opacity="0.55"/>
   </radialGradient>
 
   <!-- ═══ FILTERS ═══ -->
-  <filter id="causticGlow" x="-20%" y="-20%" width="140%" height="140%">
-    <feGaussianBlur stdDeviation="4" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-
   <filter id="padShadow" x="-20%" y="-20%" width="140%" height="140%">
     <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000b1f" flood-opacity="0.5"/>
   </filter>
@@ -111,106 +100,8 @@
 
 <!-- ═══ LAYER 1: POND BED ═══ -->
 <rect width="100%" height="100%" fill="url(#pondDeep)"/>
-<rect width="100%" height="100%" fill="url(#surfaceShimmer)"/>
 
-<!-- ═══ LAYER 2: NATURAL WATER CAUSTICS (REFRACTED LIGHT MESH & CELLULAR DAPPLES) ═══ -->
-<g filter="url(#causticGlow)">
-  <!-- Refractive Wave Caustic Ribbon 1 -->
-  <path d="M -20,80.0 Q 60.0,92.0 120.0,80.0 Q 180.0,109.5 240.0,97.5 Q 300.0,84.0 360.0,72.0 Q 420.0,78.1 480.0,66.1 Q 540.0,106.3 600.0,94.3 Q 660.0,99.4 720.0,87.4 Q 780.0,74.3 840.0,62.3 Q 900.0,92.6 960.0,80.6 Q 1020.0,109.4 1080.0,97.4" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
-    <animate attributeName="d" values="M -20,80.0 Q 60.0,92.0 120.0,80.0 Q 180.0,109.5 240.0,97.5 Q 300.0,84.0 360.0,72.0 Q 420.0,78.1 480.0,66.1 Q 540.0,106.3 600.0,94.3 Q 660.0,99.4 720.0,87.4 Q 780.0,74.3 840.0,62.3 Q 900.0,92.6 960.0,80.6 Q 1020.0,109.4 1080.0,97.4; M -20,98.0 Q 60.0,59.4 120.0,71.4 Q 180.0,54.6 240.0,66.6 Q 300.0,82.7 360.0,94.7 Q 420.0,74.7 480.0,86.7 Q 540.0,50.2 600.0,62.2 Q 660.0,69.4 720.0,81.4 Q 780.0,85.2 840.0,97.2 Q 900.0,58.8 960.0,70.8 Q 1020.0,55.0 1080.0,67.0; M -20,80.0 Q 60.0,92.0 120.0,80.0 Q 180.0,109.5 240.0,97.5 Q 300.0,84.0 360.0,72.0 Q 420.0,78.1 480.0,66.1 Q 540.0,106.3 600.0,94.3 Q 660.0,99.4 720.0,87.4 Q 780.0,74.3 840.0,62.3 Q 900.0,92.6 960.0,80.6 Q 1020.0,109.4 1080.0,97.4" dur="6.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="6.0s" repeatCount="indefinite"/>
-  </path>
-  <!-- Refractive Wave Caustic Ribbon 2 -->
-  <path d="M -20,165.0 Q 60.0,192.1 120.0,180.1 Q 180.0,183.0 240.0,171.0 Q 300.0,159.1 360.0,147.1 Q 420.0,179.1 480.0,167.1 Q 540.0,193.9 600.0,181.9 Q 660.0,167.2 720.0,155.2 Q 780.0,164.5 840.0,152.5 Q 900.0,192.5 960.0,180.5 Q 1020.0,182.5 1080.0,170.5" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
-    <animate attributeName="d" values="M -20,165.0 Q 60.0,192.1 120.0,180.1 Q 180.0,183.0 240.0,171.0 Q 300.0,159.1 360.0,147.1 Q 420.0,179.1 480.0,167.1 Q 540.0,193.9 600.0,181.9 Q 660.0,167.2 720.0,155.2 Q 780.0,164.5 840.0,152.5 Q 900.0,192.5 960.0,180.5 Q 1020.0,182.5 1080.0,170.5; M -20,183.0 Q 60.0,135.0 120.0,147.0 Q 180.0,155.8 240.0,167.8 Q 300.0,169.7 360.0,181.7 Q 420.0,142.6 480.0,154.6 Q 540.0,141.1 600.0,153.1 Q 660.0,168.8 720.0,180.8 Q 780.0,157.7 840.0,169.7 Q 900.0,135.0 960.0,147.0 Q 1020.0,156.4 1080.0,168.4; M -20,165.0 Q 60.0,192.1 120.0,180.1 Q 180.0,183.0 240.0,171.0 Q 300.0,159.1 360.0,147.1 Q 420.0,179.1 480.0,167.1 Q 540.0,193.9 600.0,181.9 Q 660.0,167.2 720.0,155.2 Q 780.0,164.5 840.0,152.5 Q 900.0,192.5 960.0,180.5 Q 1020.0,182.5 1080.0,170.5" dur="7.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="7.5s" repeatCount="indefinite"/>
-  </path>
-  <!-- Refractive Wave Caustic Ribbon 3 -->
-  <path d="M -20,250.0 Q 60.0,278.4 120.0,266.4 Q 180.0,251.0 240.0,239.0 Q 300.0,250.6 360.0,238.6 Q 420.0,278.2 480.0,266.2 Q 540.0,266.0 600.0,254.0 Q 660.0,244.0 720.0,232.0 Q 780.0,266.2 840.0,254.2 Q 900.0,278.1 960.0,266.1 Q 1020.0,250.5 1080.0,238.5" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
-    <animate attributeName="d" values="M -20,250.0 Q 60.0,278.4 120.0,266.4 Q 180.0,251.0 240.0,239.0 Q 300.0,250.6 360.0,238.6 Q 420.0,278.2 480.0,266.2 Q 540.0,266.0 600.0,254.0 Q 660.0,244.0 720.0,232.0 Q 780.0,266.2 840.0,254.2 Q 900.0,278.1 960.0,266.1 Q 1020.0,250.5 1080.0,238.5; M -20,268.0 Q 60.0,227.2 120.0,239.2 Q 180.0,254.5 240.0,266.5 Q 300.0,241.3 360.0,253.3 Q 420.0,220.0 480.0,232.0 Q 540.0,242.9 600.0,254.9 Q 660.0,253.8 720.0,265.8 Q 780.0,225.9 840.0,237.9 Q 900.0,227.7 960.0,239.7 Q 1020.0,254.7 1080.0,266.7; M -20,250.0 Q 60.0,278.4 120.0,266.4 Q 180.0,251.0 240.0,239.0 Q 300.0,250.6 360.0,238.6 Q 420.0,278.2 480.0,266.2 Q 540.0,266.0 600.0,254.0 Q 660.0,244.0 720.0,232.0 Q 780.0,266.2 840.0,254.2 Q 900.0,278.1 960.0,266.1 Q 1020.0,250.5 1080.0,238.5" dur="9.0s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="9.0s" repeatCount="indefinite"/>
-  </path>
-  <!-- Refractive Wave Caustic Ribbon 4 -->
-  <path d="M -20,335.0 Q 60.0,349.5 120.0,337.5 Q 180.0,329.1 240.0,317.1 Q 300.0,352.6 360.0,340.6 Q 420.0,362.4 480.0,350.4 Q 540.0,334.4 600.0,322.4 Q 660.0,337.3 720.0,325.3 Q 780.0,364.0 840.0,352.0 Q 900.0,348.9 960.0,336.9 Q 1020.0,329.1 1080.0,317.1" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
-    <animate attributeName="d" values="M -20,335.0 Q 60.0,349.5 120.0,337.5 Q 180.0,329.1 240.0,317.1 Q 300.0,352.6 360.0,340.6 Q 420.0,362.4 480.0,350.4 Q 540.0,334.4 600.0,322.4 Q 660.0,337.3 720.0,325.3 Q 780.0,364.0 840.0,352.0 Q 900.0,348.9 960.0,336.9 Q 1020.0,329.1 1080.0,317.1; M -20,353.0 Q 60.0,329.3 120.0,341.3 Q 180.0,338.0 240.0,350.0 Q 300.0,309.9 360.0,321.9 Q 420.0,314.0 480.0,326.0 Q 540.0,340.2 600.0,352.2 Q 660.0,324.2 720.0,336.2 Q 780.0,305.2 840.0,317.2 Q 900.0,329.9 960.0,341.9 Q 1020.0,337.6 1080.0,349.6; M -20,335.0 Q 60.0,349.5 120.0,337.5 Q 180.0,329.1 240.0,317.1 Q 300.0,352.6 360.0,340.6 Q 420.0,362.4 480.0,350.4 Q 540.0,334.4 600.0,322.4 Q 660.0,337.3 720.0,325.3 Q 780.0,364.0 840.0,352.0 Q 900.0,348.9 960.0,336.9 Q 1020.0,329.1 1080.0,317.1" dur="10.5s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="10.5s" repeatCount="indefinite"/>
-  </path>
-  <ellipse cx="100.0" cy="104.0" rx="32.0" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.0;40.0;32.0" dur="3.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="270.1" cy="76.1" rx="37.0" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.0;46.3;37.0" dur="4.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="426.4" cy="103.4" rx="37.5" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.5;46.8;37.5" dur="4.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="567.5" cy="77.2" rx="32.8" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.8;41.1;32.8" dur="5.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="706.4" cy="101.8" rx="27.5" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="5.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="27.5;34.3;27.5" dur="5.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="857.7" cy="79.4" rx="26.2" ry="22.0" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="26.2;32.8;26.2" dur="3.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="116.4" cy="219.0" rx="32.0" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.0;40.0;32.0" dur="5.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="257.5" cy="191.1" rx="37.0" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="5.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.0;46.3;37.0" dur="5.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="396.4" cy="218.4" rx="37.5" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.5;46.8;37.5" dur="3.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="547.7" cy="192.2" rx="32.8" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.8;41.1;32.8" dur="4.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="715.0" cy="216.8" rx="27.5" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="27.5;34.3;27.5" dur="4.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="886.8" cy="194.4" rx="26.2" ry="20.2" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="26.2;32.8;26.2" dur="5.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="86.4" cy="334.0" rx="32.0" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.0;40.0;32.0" dur="4.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="237.7" cy="306.1" rx="37.0" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.0;46.3;37.0" dur="4.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="405.0" cy="333.4" rx="37.5" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="4.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="37.5;46.8;37.5" dur="5.1s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="576.8" cy="307.2" rx="32.8" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="5.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="32.8;41.1;32.8" dur="5.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="737.8" cy="331.8" rx="27.5" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.2s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="27.5;34.3;27.5" dur="3.6s" repeatCount="indefinite"/>
-  </ellipse>
-  <ellipse cx="882.4" cy="309.4" rx="26.2" ry="16.3" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="3.7s" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="26.2;32.8;26.2" dur="4.1s" repeatCount="indefinite"/>
-  </ellipse>
-
-</g>
-
-<!-- ═══ LAYER 3: POND GRAVEL BED ═══ -->
+<!-- ═══ LAYER 2: POND GRAVEL BED ═══ -->
 <g opacity="0.15" fill="#1e3a5f">
   <circle cx="80" cy="390" r="3"/><circle cx="150" cy="405" r="2"/><circle cx="220" cy="400" r="4"/>
   <circle cx="310" cy="410" r="2"/><circle cx="400" cy="395" r="3"/><circle cx="490" cy="408" r="2"/>
@@ -218,7 +109,7 @@
   <circle cx="820" cy="406" r="2"/><circle cx="900" cy="394" r="4"/><circle cx="960" cy="410" r="2"/>
 </g>
 
-<!-- ═══ LAYER 4: 12 SWIMMING KOI FISH (SWIMMING IN WATER BENEATH SURFACE PLANTS) ═══ -->
+<!-- ═══ LAYER 3: 12 SWIMMING KOI FISH (SWIMMING IN WATER BENEATH SURFACE PLANTS) ═══ -->
 
 <!-- Koi: Kohaku (white-1) — Full Life Cycle Movement (Oval, Sprint, Hover, Zig-Zag, Fig-8) -->
 <g id="fish-white-1">
@@ -496,7 +387,7 @@
   </g>
 </g>
 
-<!-- ═══ LAYER 5: FLOATING BOTANICALS (ON TOP OF WATER — FISH SWIM UNDERNEATH) ═══ -->
+<!-- ═══ LAYER 4: FLOATING BOTANICALS (ON TOP OF WATER — FISH SWIM UNDERNEATH) ═══ -->
 <g id="botanicals">
   <!-- Top-Left Lotus & Lily Cluster -->
   <g transform="translate(78, 68) rotate(-12)">
@@ -553,7 +444,7 @@
   </g>
 </g>
 
-<!-- ═══ LAYER 6: SURFACE RIPPLES ═══ -->
+<!-- ═══ LAYER 5: SURFACE RIPPLES ═══ -->
 <g fill="none" stroke="#7dd3fc" stroke-width="1.0">
   <circle cx="430" cy="95" r="3" opacity="0">
     <animate attributeName="r" values="3;60" dur="8s" repeatCount="indefinite" begin="0s"/>
@@ -577,7 +468,7 @@
   </circle>
 </g>
 
-<!-- ═══ LAYER 7: VIGNETTE & FRAME ═══ -->
+<!-- ═══ LAYER 6: VIGNETTE & FRAME ═══ -->
 <rect width="100%" height="100%" fill="url(#vignette)"/>
 <rect width="100%" height="100%" rx="16" ry="16" fill="none"
   stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.28"/>

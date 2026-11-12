@@ -143,11 +143,11 @@ type ContributionSummary struct {
 
 // AccountSnapshot holds GitHub account observations.
 type AccountSnapshot struct {
-	AccountID           uint64                             `json:"account_id"`
-	Repositories        []RepositoryObservation            `json:"repositories"`
-	ContributionHistory *ContributionHistory               `json:"contribution_history,omitempty"`
-	LanguageColors      map[string]*LanguageColor          `json:"language_colors,omitempty"`
-	SchemaVersion       uint32                             `json:"schema_version"`
+	AccountID           uint64                    `json:"account_id"`
+	Repositories        []RepositoryObservation   `json:"repositories"`
+	ContributionHistory *ContributionHistory      `json:"contribution_history,omitempty"`
+	LanguageColors      map[string]*LanguageColor `json:"language_colors,omitempty"`
+	SchemaVersion       uint32                    `json:"schema_version"`
 }
 
 type snapshotDocument struct {
