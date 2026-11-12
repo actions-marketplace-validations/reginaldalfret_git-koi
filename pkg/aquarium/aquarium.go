@@ -18,8 +18,6 @@ const (
 	PondWidth  = 1000
 	PondHeight = 420
 )
-
-// FishSpec defines trajectory, behavioral animation, and visual properties for each koi.
 type FishSpec struct {
 	Body      coat.KoiBody
 	Name      string
@@ -161,55 +159,6 @@ func buildLifeCyclePath(seed int) string {
 	}
 
 	return catmullRomToBezier(pts)
-}
-
-// generateCaustics generates authentic animated underwater caustics:
-// flowing refracted light ribbons and pulsing organic cellular dapples.
-func generateCaustics() string {
-	var sb strings.Builder
-
-	// 1. Organic, undulating caustic light ribbons (refracted surface wave patterns)
-	for i := 0; i < 4; i++ {
-		yBase := 80.0 + float64(i)*85.0
-		amp := 18.0
-		dur := 6.0 + float64(i)*1.5
-
-		var d1, d2 strings.Builder
-		d1.WriteString(fmt.Sprintf("M -20,%.1f", yBase))
-		d2.WriteString(fmt.Sprintf("M -20,%.1f", yBase+amp))
-		for x := 0.0; x <= 1020.0; x += 120.0 {
-			y1 := yBase + amp*math.Sin(x*0.015+float64(i))
-			y2 := yBase - amp*math.Sin(x*0.015+float64(i)+0.5)
-			d1.WriteString(fmt.Sprintf(" Q %.1f,%.1f %.1f,%.1f", x+60.0, y1+12.0, x+120.0, y1))
-			d2.WriteString(fmt.Sprintf(" Q %.1f,%.1f %.1f,%.1f", x+60.0, y2-12.0, x+120.0, y2))
-		}
-
-		sb.WriteString(fmt.Sprintf(`  <!-- Refractive Wave Caustic Ribbon %d -->
-  <path d="%s" fill="none" stroke="#7dd3fc" stroke-width="2.0" opacity="0.12">
-    <animate attributeName="d" values="%s; %s; %s" dur="%.1fs" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0.08;0.18;0.10;0.16;0.08" dur="%.1fs" repeatCount="indefinite"/>
-  </path>
-`, i+1, d1.String(), d1.String(), d2.String(), d1.String(), dur, dur))
-	}
-
-	// 2. Interlocking cellular focal nodes (bright light dapples on pond bottom)
-	for row := 0; row < 3; row++ {
-		for col := 0; col < 6; col++ {
-			cx := 100.0 + float64(col)*155.0 + math.Sin(float64(row*2+col))*18.0
-			cy := 90.0 + float64(row)*115.0 + math.Cos(float64(col*3))*14.0
-			rx := 32.0 + math.Sin(float64(col))*6.0
-			ry := 18.0 + math.Cos(float64(row))*4.0
-			dur := 3.2 + math.Mod(float64(row*4+col*3), 2.5)
-
-			sb.WriteString(fmt.Sprintf(`  <ellipse cx="%.1f" cy="%.1f" rx="%.1f" ry="%.1f" fill="#bae6fd" opacity="0.10">
-    <animate attributeName="opacity" values="0.05;0.18;0.07;0.15;0.05" dur="%.1fs" repeatCount="indefinite"/>
-    <animate attributeName="rx" values="%.1f;%.1f;%.1f" dur="%.1fs" repeatCount="indefinite"/>
-  </ellipse>
-`, cx, cy, rx, ry, dur, rx, rx*1.25, rx, dur+0.4))
-		}
-	}
-
-	return sb.String()
 }
 
 // 12 Mathematically Collision-Free Paths: Distributed across 6 non-overlapping geographic pond circuits
@@ -446,8 +395,6 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		}
 	}
 
-	causticsSVG := generateCaustics()
-
 	var sb strings.Builder
 
 	sb.WriteString(fmt.Sprintf(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 %d %d" width="100%%" style="border-radius:16px; overflow:hidden; display:block; background:#050d1a;">
@@ -460,23 +407,12 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
     <stop offset="100%%" stop-color="#020810" stop-opacity="1"/>
   </radialGradient>
 
-  <linearGradient id="surfaceShimmer" x1="0%%" y1="0%%" x2="100%%" y2="100%%">
-    <stop offset="0%%" stop-color="#0ea5e9" stop-opacity="0.08"/>
-    <stop offset="50%%" stop-color="#06b6d4" stop-opacity="0.04"/>
-    <stop offset="100%%" stop-color="#0284c7" stop-opacity="0.10"/>
-  </linearGradient>
-
   <radialGradient id="vignette" cx="50%%" cy="50%%" r="70%%">
     <stop offset="60%%" stop-color="#000000" stop-opacity="0"/>
     <stop offset="100%%" stop-color="#000000" stop-opacity="0.55"/>
   </radialGradient>
 
   <!-- ═══ FILTERS ═══ -->
-  <filter id="causticGlow" x="-20%%" y="-20%%" width="140%%" height="140%%">
-    <feGaussianBlur stdDeviation="4" result="blur"/>
-    <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-  </filter>
-
   <filter id="padShadow" x="-20%%" y="-20%%" width="140%%" height="140%%">
     <feDropShadow dx="2" dy="4" stdDeviation="4" flood-color="#000b1f" flood-opacity="0.5"/>
   </filter>
@@ -563,14 +499,8 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 
 <!-- ═══ LAYER 1: POND BED ═══ -->
 <rect width="100%%" height="100%%" fill="url(#pondDeep)"/>
-<rect width="100%%" height="100%%" fill="url(#surfaceShimmer)"/>
 
-<!-- ═══ LAYER 2: NATURAL WATER CAUSTICS (REFRACTED LIGHT MESH & CELLULAR DAPPLES) ═══ -->
-<g filter="url(#causticGlow)">
-%s
-</g>
-
-<!-- ═══ LAYER 3: POND GRAVEL BED ═══ -->
+<!-- ═══ LAYER 2: POND GRAVEL BED ═══ -->
 <g opacity="0.15" fill="#1e3a5f">
   <circle cx="80" cy="390" r="3"/><circle cx="150" cy="405" r="2"/><circle cx="220" cy="400" r="4"/>
   <circle cx="310" cy="410" r="2"/><circle cx="400" cy="395" r="3"/><circle cx="490" cy="408" r="2"/>
@@ -578,12 +508,11 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   <circle cx="820" cy="406" r="2"/><circle cx="900" cy="394" r="4"/><circle cx="960" cy="410" r="2"/>
 </g>
 
-<!-- ═══ LAYER 4: 12 SWIMMING KOI FISH (SWIMMING IN WATER BENEATH SURFACE PLANTS) ═══ -->
+<!-- ═══ LAYER 3: 12 SWIMMING KOI FISH (SWIMMING IN WATER BENEATH SURFACE PLANTS) ═══ -->
 `, PondWidth, PondHeight,
 		pathLife0, pathLife1, pathLife2, pathLife3,
 		pathLife4, pathLife5, pathLife6, pathLife7,
-		pathLife8, pathLife9, pathLife10, pathLife11,
-		causticsSVG))
+		pathLife8, pathLife9, pathLife10, pathLife11))
 
 	for _, spec := range DefaultFishSpecs {
 		var b64 string
@@ -629,7 +558,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 	}
 
 	sb.WriteString(`
-<!-- ═══ LAYER 5: FLOATING BOTANICALS (ON TOP OF WATER — FISH SWIM UNDERNEATH) ═══ -->
+<!-- ═══ LAYER 4: FLOATING BOTANICALS (ON TOP OF WATER — FISH SWIM UNDERNEATH) ═══ -->
 <g id="botanicals">
   <!-- Top-Left Lotus & Lily Cluster -->
   <g transform="translate(78, 68) rotate(-12)">
@@ -686,7 +615,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   </g>
 </g>
 
-<!-- ═══ LAYER 6: SURFACE RIPPLES ═══ -->
+<!-- ═══ LAYER 5: SURFACE RIPPLES ═══ -->
 <g fill="none" stroke="#7dd3fc" stroke-width="1.0">
   <circle cx="430" cy="95" r="3" opacity="0">
     <animate attributeName="r" values="3;60" dur="8s" repeatCount="indefinite" begin="0s"/>
@@ -710,7 +639,7 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
   </circle>
 </g>
 
-<!-- ═══ LAYER 7: VIGNETTE & FRAME ═══ -->
+<!-- ═══ LAYER 6: VIGNETTE & FRAME ═══ -->
 <rect width="100%" height="100%" fill="url(#vignette)"/>
 <rect width="100%" height="100%" rx="16" ry="16" fill="none"
   stroke="#38bdf8" stroke-width="1.2" stroke-opacity="0.28"/>
