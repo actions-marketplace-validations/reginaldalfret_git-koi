@@ -18,7 +18,7 @@ import (
 	"github.com/reginaldalfret/git-koi-aquarium/pkg/render"
 )
 
-const version = "1.1.0"
+const version = "1.2.0"
 
 const usage = `Usage: git-koi collect LOGIN [--output FILE]
        git-koi render SNAPSHOT --output-dir DIR [--body BODY]

@@ -43,8 +43,8 @@ func TestCLIVersionAndHelp(t *testing.T) {
 	if err != nil {
 		t.Errorf("--version failed: %v", err)
 	}
-	if !strings.Contains(string(outVer), "git-koi 1.1.0") {
-		t.Errorf("expected 'git-koi 1.1.0' in version output, got: %s", string(outVer))
+	if !strings.Contains(string(outVer), "git-koi 1.2.0") {
+		t.Errorf("expected 'git-koi 1.2.0' in version output, got: %s", string(outVer))
 	}
 
 	// 3. No args exits 2

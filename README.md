@@ -1,6 +1,6 @@
 # git-koi-aquarium 🐟
 
-[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-aquarium)
+[![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-action)
 [![CI](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml/badge.svg)](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/reginaldalfret/git-koi-aquarium?style=flat-square&color=blue)](https://github.com/reginaldalfret/git-koi-aquarium/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reginaldalfret/git-koi-aquarium.svg)](https://pkg.go.dev/github.com/reginaldalfret/git-koi-aquarium)
