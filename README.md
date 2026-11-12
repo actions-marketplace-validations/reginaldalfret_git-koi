@@ -1,6 +1,7 @@
 # git-koi-aquarium 🐟
 
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-git--koi--aquarium-blue?logo=github&style=flat-square)](https://github.com/marketplace/actions/git-koi-aquarium)
+[![CI](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml/badge.svg)](https://github.com/reginaldalfret/git-koi-aquarium/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/reginaldalfret/git-koi-aquarium?style=flat-square&color=blue)](https://github.com/reginaldalfret/git-koi-aquarium/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/reginaldalfret/git-koi-aquarium.svg)](https://pkg.go.dev/github.com/reginaldalfret/git-koi-aquarium)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](https://opensource.org/licenses/MIT)
@@ -57,8 +58,10 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add koi/aquarium.svg
-          git diff --quiet && git diff --staged --quiet || git commit -m "chore: update daily koi aquarium [skip ci]"
-          git push
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: update daily koi aquarium [skip ci]"
+            git push
+          fi
 ```
 
 ### Step 2: Embed into Your Profile README

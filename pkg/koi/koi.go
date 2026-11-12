@@ -29,10 +29,10 @@ func CalculateGrowthFraction(totalContributions uint64) float64 {
 
 // RecentActivity records recent contribution frequency around the observation date.
 type RecentActivity struct {
-	QuietDayCount                 uint32
-	RecentContributions           uint64
-	CompleteWeekContributions     []uint64
-	ObservationWeekContributions  []uint64
+	QuietDayCount                uint32
+	RecentContributions          uint64
+	CompleteWeekContributions    []uint64
+	ObservationWeekContributions []uint64
 }
 
 // RecentStreakType denotes whether the most recent streak is current or ended.

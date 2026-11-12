@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  quality-gates:
+    name: Lint, Test & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Check Formatting (gofmt)
+        run: |
+          unformatted=$(gofmt -l .)
+          if [ -n "$unformatted" ]; then
+            echo "Unformatted Go files detected:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: Static Analysis (go vet)
+        run: go vet ./...
+
+      - name: Run Tests with Race Detector
+        run: go test -v -race ./...
+
+      - name: Run Benchmarks
+        run: go test -bench '.*' -benchtime 1x -benchmem -run '^$' ./tests
+
+      - name: Build All Binaries
+        run: go build -v ./...

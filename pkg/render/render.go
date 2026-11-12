@@ -28,15 +28,15 @@ var (
 )
 
 type KoiAnatomy struct {
-	BodyLengthPixels     float64
-	BodyWidthPixels      float64
-	HeadSlantFraction    float64
-	NoseWidthFraction    float64
-	TailTaperExponent    float64
-	AdultFinFraction     float64
-	FinLengthMultiplier  float64
-	EyeAlongFraction     float64
-	EyeScale             float64
+	BodyLengthPixels    float64
+	BodyWidthPixels     float64
+	HeadSlantFraction   float64
+	NoseWidthFraction   float64
+	TailTaperExponent   float64
+	AdultFinFraction    float64
+	FinLengthMultiplier float64
+	EyeAlongFraction    float64
+	EyeScale            float64
 }
 
 type CurvePoint struct {

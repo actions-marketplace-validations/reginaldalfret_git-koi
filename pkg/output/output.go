@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"html"
 	"image"
 	"image/color"
 	"image/gif"
@@ -20,8 +21,8 @@ const (
 	StaticHeightPixels = FrameHeightPixels * StaticExportScale
 	FramesPerSecond    = 15
 
-	GifColorLimit        = 255
-	GifTransparentIndex  = 0
+	GifColorLimit       = 255
+	GifTransparentIndex = 0
 )
 
 // KoiFrame holds 256x256 RGBA pixel data (row-major).
@@ -261,8 +262,6 @@ const previewPanels = `</h1></header>
 
 // EncodePreviewHTML creates a preview page displaying koi.gif and koi.png side by side.
 func EncodePreviewHTML(caption string) string {
-	escaped := strings.ReplaceAll(caption, "&", "&amp;")
-	escaped = strings.ReplaceAll(escaped, "<", "&lt;")
-	escaped = strings.ReplaceAll(escaped, ">", "&gt;")
+	escaped := html.EscapeString(caption)
 	return previewHead + escaped + previewPanels
 }

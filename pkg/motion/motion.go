@@ -285,7 +285,7 @@ func calculateRestDrive(loopFrame uint32, depth float64) drive {
 			HeadingOffsetRadians: swingRadians * math.Sin(loopTurn),
 			DriftPixels: [2]float64{
 				-driftPixels[0] * math.Sin(loopTurn),
-				-driftPixels[1] * math.Sin(2.0*loopTurn + 1.0),
+				-driftPixels[1] * math.Sin(2.0*loopTurn+1.0),
 			},
 		},
 		depth:                 depth,

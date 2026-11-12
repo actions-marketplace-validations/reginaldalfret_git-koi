@@ -2,9 +2,11 @@ package aquarium
 
 import (
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"math"
 	"strings"
+	"sync"
 
 	"github.com/reginaldalfret/git-koi-aquarium/pkg/behavior"
 	"github.com/reginaldalfret/git-koi-aquarium/pkg/coat"
@@ -18,6 +20,7 @@ const (
 	PondWidth  = 1000
 	PondHeight = 420
 )
+
 type FishSpec struct {
 	Body      coat.KoiBody
 	Name      string
@@ -186,175 +189,169 @@ var (
 var DefaultFishSpecs = []FishSpec{
 	// 1. Perimeter (Outer Pond Loop)
 	{
-		Body:      coat.BodyWhite,
-		Name:      "white-1",
-		Variety:   "Kohaku",
-		Scale:     0.53,
-		Duration:  "110s",
-		Begin:     "0s",
-		PathID:    "pathLife0",
-		PathD:     pathLife0,
-		WagAngle:  "2.8",
-		WagDur:    "2.5s",
+		Body:     coat.BodyWhite,
+		Name:     "white-1",
+		Variety:  "Kohaku",
+		Scale:    0.53,
+		Duration: "110s",
+		Begin:    "0s",
+		PathID:   "pathLife0",
+		PathD:    pathLife0,
+		WagAngle: "2.8",
+		WagDur:   "2.5s",
 	},
 	{
-		Body:      coat.BodyGold,
-		Name:      "gold-1",
-		Variety:   "Yamabuki",
-		Scale:     0.53,
-		Duration:  "110s",
-		Begin:     "-55s",
-		PathID:    "pathLife1",
-		PathD:     pathLife1,
-		WagAngle:  "3.0",
-		WagDur:    "2.4s",
+		Body:     coat.BodyGold,
+		Name:     "gold-1",
+		Variety:  "Yamabuki",
+		Scale:    0.53,
+		Duration: "110s",
+		Begin:    "-55s",
+		PathID:   "pathLife1",
+		PathD:    pathLife1,
+		WagAngle: "3.0",
+		WagDur:   "2.4s",
 	},
 
 	// 2. North-West Basin
 	{
-		Body:      coat.BodyAsagi,
-		Name:      "asagi-1",
-		Variety:   "Asagi",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "0s",
-		PathID:    "pathLife2",
-		PathD:     pathLife2,
-		WagAngle:  "2.9",
-		WagDur:    "2.6s",
+		Body:     coat.BodyAsagi,
+		Name:     "asagi-1",
+		Variety:  "Asagi",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "0s",
+		PathID:   "pathLife2",
+		PathD:    pathLife2,
+		WagAngle: "2.9",
+		WagDur:   "2.6s",
 	},
 	{
-		Body:      coat.BodyBlack,
-		Name:      "black-1",
-		Variety:   "Karasu",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "-41s",
-		PathID:    "pathLife3",
-		PathD:     pathLife3,
-		WagAngle:  "2.6",
-		WagDur:    "2.7s",
+		Body:     coat.BodyBlack,
+		Name:     "black-1",
+		Variety:  "Karasu",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "-41s",
+		PathID:   "pathLife3",
+		PathD:    pathLife3,
+		WagAngle: "2.6",
+		WagDur:   "2.7s",
 	},
 
 	// 3. North-East Basin
 	{
-		Body:      coat.BodyTea,
-		Name:      "tea-1",
-		Variety:   "Chagoi",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "0s",
-		PathID:    "pathLife4",
-		PathD:     pathLife4,
-		WagAngle:  "2.8",
-		WagDur:    "2.5s",
+		Body:     coat.BodyTea,
+		Name:     "tea-1",
+		Variety:  "Chagoi",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "0s",
+		PathID:   "pathLife4",
+		PathD:    pathLife4,
+		WagAngle: "2.8",
+		WagDur:   "2.5s",
 	},
 	{
-		Body:      coat.BodyPlatinum,
-		Name:      "platinum-1",
-		Variety:   "Ogon",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "-41s",
-		PathID:    "pathLife5",
-		PathD:     pathLife5,
-		WagAngle:  "2.7",
-		WagDur:    "2.5s",
+		Body:     coat.BodyPlatinum,
+		Name:     "platinum-1",
+		Variety:  "Ogon",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "-41s",
+		PathID:   "pathLife5",
+		PathD:    pathLife5,
+		WagAngle: "2.7",
+		WagDur:   "2.5s",
 	},
 
 	// 4. Central Deep Basin
 	{
-		Body:      coat.BodyWhite,
-		Name:      "white-2",
-		Variety:   "Kohaku",
-		Scale:     0.53,
-		Duration:  "92s",
-		Begin:     "0s",
-		PathID:    "pathLife6",
-		PathD:     pathLife6,
-		WagAngle:  "3.0",
-		WagDur:    "2.5s",
+		Body:     coat.BodyWhite,
+		Name:     "white-2",
+		Variety:  "Kohaku",
+		Scale:    0.53,
+		Duration: "92s",
+		Begin:    "0s",
+		PathID:   "pathLife6",
+		PathD:    pathLife6,
+		WagAngle: "3.0",
+		WagDur:   "2.5s",
 	},
 	{
-		Body:      coat.BodyGold,
-		Name:      "gold-2",
-		Variety:   "Yamabuki",
-		Scale:     0.53,
-		Duration:  "92s",
-		Begin:     "-46s",
-		PathID:    "pathLife7",
-		PathD:     pathLife7,
-		WagAngle:  "3.2",
-		WagDur:    "2.3s",
+		Body:     coat.BodyGold,
+		Name:     "gold-2",
+		Variety:  "Yamabuki",
+		Scale:    0.53,
+		Duration: "92s",
+		Begin:    "-46s",
+		PathID:   "pathLife7",
+		PathD:    pathLife7,
+		WagAngle: "3.2",
+		WagDur:   "2.3s",
 	},
 
 	// 5. South-West Basin
 	{
-		Body:      coat.BodyAsagi,
-		Name:      "asagi-2",
-		Variety:   "Asagi",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "0s",
-		PathID:    "pathLife8",
-		PathD:     pathLife8,
-		WagAngle:  "2.8",
-		WagDur:    "2.6s",
+		Body:     coat.BodyAsagi,
+		Name:     "asagi-2",
+		Variety:  "Asagi",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "0s",
+		PathID:   "pathLife8",
+		PathD:    pathLife8,
+		WagAngle: "2.8",
+		WagDur:   "2.6s",
 	},
 	{
-		Body:      coat.BodyBlack,
-		Name:      "black-2",
-		Variety:   "Karasu",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "-41s",
-		PathID:    "pathLife9",
-		PathD:     pathLife9,
-		WagAngle:  "2.6",
-		WagDur:    "2.7s",
+		Body:     coat.BodyBlack,
+		Name:     "black-2",
+		Variety:  "Karasu",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "-41s",
+		PathID:   "pathLife9",
+		PathD:    pathLife9,
+		WagAngle: "2.6",
+		WagDur:   "2.7s",
 	},
 
 	// 6. South-East Basin
 	{
-		Body:      coat.BodyTea,
-		Name:      "tea-2",
-		Variety:   "Chagoi",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "0s",
-		PathID:    "pathLife10",
-		PathD:     pathLife10,
-		WagAngle:  "2.9",
-		WagDur:    "2.4s",
+		Body:     coat.BodyTea,
+		Name:     "tea-2",
+		Variety:  "Chagoi",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "0s",
+		PathID:   "pathLife10",
+		PathD:    pathLife10,
+		WagAngle: "2.9",
+		WagDur:   "2.4s",
 	},
 	{
-		Body:      coat.BodyPlatinum,
-		Name:      "platinum-2",
-		Variety:   "Ogon",
-		Scale:     0.53,
-		Duration:  "82s",
-		Begin:     "-41s",
-		PathID:    "pathLife11",
-		PathD:     pathLife11,
-		WagAngle:  "2.8",
-		WagDur:    "2.5s",
+		Body:     coat.BodyPlatinum,
+		Name:     "platinum-2",
+		Variety:  "Ogon",
+		Scale:    0.53,
+		Duration: "82s",
+		Begin:    "-41s",
+		PathID:   "pathLife11",
+		PathD:    pathLife11,
+		WagAngle: "2.8",
+		WagDur:   "2.5s",
 	},
 }
 
-// RenderAquariumGifs renders animated GIFs for all 6 distinct koi coat varieties.
-// Aquarium koi are rendered as full-grown adult koi to showcase their markings and flowy fins.
+// RenderAquariumGifs renders animated GIFs for all 6 distinct koi coat varieties concurrently.
+// Each variety reflects the account's development data (language pigments, streaks, and vibrancy).
 func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error) {
+	if dev == nil {
+		return nil, errors.New("cannot render aquarium gifs: nil development data")
+	}
+
 	const restLoopFrames = 30
-	result := make(map[coat.KoiBody][]byte)
-
-	var aquariumDev koi.KoiDevelopment
-	if dev != nil {
-		aquariumDev = *dev
-	}
-	if aquariumDev.TotalContributions < koi.AdultContributions {
-		aquariumDev.TotalContributions = koi.AdultContributions
-	}
-
 	distinctBodies := []coat.KoiBody{
 		coat.BodyWhite,
 		coat.BodyGold,
@@ -364,16 +361,36 @@ func RenderAquariumGifs(dev *koi.KoiDevelopment) (map[coat.KoiBody][]byte, error
 		coat.BodyPlatinum,
 	}
 
+	result := make(map[coat.KoiBody][]byte)
+	var mu sync.Mutex
+	var wg sync.WaitGroup
+	var renderErr error
+	var errOnce sync.Once
+
 	for _, body := range distinctBodies {
-		frames := make([]*output.KoiFrame, restLoopFrames)
-		for i := uint32(0); i < restLoopFrames; i++ {
-			frames[i] = render.RenderSwimFrame(&aquariumDev, body, behavior.Rest, i)
-		}
-		gifBytes, err := output.EncodeScaledGIF(frames, 1)
-		if err != nil {
-			return nil, fmt.Errorf("encoding %s koi: %w", body.String(), err)
-		}
-		result[body] = gifBytes
+		wg.Add(1)
+		go func(b coat.KoiBody) {
+			defer wg.Done()
+			frames := make([]*output.KoiFrame, restLoopFrames)
+			for i := uint32(0); i < restLoopFrames; i++ {
+				frames[i] = render.RenderSwimFrame(dev, b, behavior.Rest, i)
+			}
+			gifBytes, err := output.EncodeScaledGIF(frames, 1)
+			if err != nil {
+				errOnce.Do(func() {
+					renderErr = fmt.Errorf("encoding %s koi: %w", b.String(), err)
+				})
+				return
+			}
+			mu.Lock()
+			result[b] = gifBytes
+			mu.Unlock()
+		}(body)
+	}
+
+	wg.Wait()
+	if renderErr != nil {
+		return nil, renderErr
 	}
 
 	return result, nil
@@ -387,11 +404,14 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 		gifMap = v
 	}
 
-	if gifMap == nil && len(AuthenticOriginalKoiB64) == 0 && dev != nil {
+	// Priority 1: Use explicitly passed pre-rendered GIFs if provided.
+	// Priority 2: When dev snapshot is available, render authentic activity-derived GIFs.
+	// Priority 3: When dev is nil (static/offline mode), fall back to bundled authentic base64 GIFs.
+	if gifMap == nil && dev != nil {
 		var err error
 		gifMap, err = RenderAquariumGifs(dev)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("rendering aquarium koi: %w", err)
 		}
 	}
 
@@ -516,12 +536,12 @@ func GenerateAquariumSVG(dev *koi.KoiDevelopment, koiGifs interface{}) (string, 
 
 	for _, spec := range DefaultFishSpecs {
 		var b64 string
-		if origB64, ok := AuthenticOriginalKoiB64[spec.Body]; ok && gifMap == nil {
-			b64 = origB64
-		} else if gifMap != nil && len(gifMap[spec.Body]) > 0 {
+		if gifMap != nil && len(gifMap[spec.Body]) > 0 {
 			b64 = base64.StdEncoding.EncodeToString(gifMap[spec.Body])
 		} else if origB64, ok := AuthenticOriginalKoiB64[spec.Body]; ok {
 			b64 = origB64
+		} else {
+			return "", fmt.Errorf("no visual asset available for fish body %s", spec.Body.String())
 		}
 
 		motionAttrs := fmt.Sprintf(`dur="%s" begin="%s" repeatCount="indefinite" rotate="auto" calcMode="linear"`,
